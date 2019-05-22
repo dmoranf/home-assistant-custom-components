@@ -1,0 +1,8 @@
+{
+   "domain": "fortigate_tracker",
+   "name": "Fortigate tracker",
+   "documentation" : "https://github.com/dmoranf/home-assistant-custom-components",
+   "requirements" : [],
+   "dependencies" : [],
+   "codeowners" : []
+}
