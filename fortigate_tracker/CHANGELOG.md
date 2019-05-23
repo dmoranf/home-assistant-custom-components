@@ -1,7 +1,10 @@
 # Changelog
 
 ## [Unreleased]
-- Exception Handling
+
+## [0.1.1] - 2019-05-23
+### Fixed
+- Exception errors on failed Fortigate request.
 
 ## [0.1.0] - 2019-05-22
 ### Added

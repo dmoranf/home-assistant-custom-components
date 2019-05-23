@@ -43,21 +43,27 @@ class FortigateAPI:
         self.login()
     
     def __del__(self):
-        self.logout()
+        if self._session is not None:
+            self.logout()
 
     def login(self):
         self._session = requests.session()
-        login_uri = "https://{}:{}/logincheck".format(self._host,self._port)
-        res=self._session.post(login_uri,
+        try:
+            login_uri = "https://{}:{}/logincheck".format(self._host,self._port)
+            res=self._session.post(login_uri,
                     data='username={}&secretkey={}&ajax=1'.format(self._username,self._password),
                     verify = False,
                     timeout = self._timeout)
-        _LOGGER.debug("Login request status code: %s" %(res.status_code))
-        for cookie in self._session.cookies:
-            if cookie.name == "ccsrftoken":
-                csrftoken = cookie.value[1:-1]
-                self._session.headers.update({'X-CSRFTOKEN':csrftoken})
-                _LOGGER.debug("Cookie established")
+            _LOGGER.debug("Login request status code: %s" %(res.status_code))
+            for cookie in self._session.cookies:
+                if cookie.name == "ccsrftoken":
+                    csrftoken = cookie.value[1:-1]
+                    self._session.headers.update({'X-CSRFTOKEN':csrftoken})
+                    _LOGGER.debug("Cookie established")
+        except:
+            _LOGGER.error("Could not connect to %s" %(login_uri))
+            self._session = None
+            return False
         
     def logout(self):
         logout_uri = "https://{}:{}/logout".format(self._host,self._port)
@@ -66,11 +72,14 @@ class FortigateAPI:
 
     def get_devices(self):
         device_uri = "https://{}:{}/{}".format(self._host,self._port,FORTI_DEVICE_URI)
-        request = self._session.get (device_uri, verify = False, timeout = self._timeout)        
-        if request.status_code == 200:
-            return request.json()['results']
+        if self._session is not None:
+            request = self._session.get (device_uri, verify = False, timeout = self._timeout)        
+            if request.status_code == 200:
+                return request.json()['results']
+            else:
+                _LOGGER.error("Could'n get devices from Fortigate, request status code %s" %(request.status_code))
+                return None
         else:
-            _LOGGER.error("Could'n get devices from Fortigate, request status code %s" %(request.status_code))
             return None
 
 class FortigateDeviceTracker(DeviceScanner):
@@ -82,8 +91,6 @@ class FortigateDeviceTracker(DeviceScanner):
         self._last_results = []
         self._timeout = config[CONF_TIMEOUT]
            
-    def get_device_name(self, device):
-        return None
 
     def scan_devices(self):
         self._update_info()
@@ -106,14 +113,10 @@ class FortigateDeviceTracker(DeviceScanner):
             for device in devices:
                 if int(device["last_seen"]) < self._timeout:
                     _LOGGER.debug("Add device %s - last seen: %s" %(device["mac"],device["last_seen"]))
-                    try:
-                       name = device["host"]["name"]
-                    except:
-                       name = device["mac"].upper()
-                    try:
-                       ip = device["addr"]
-                    except:
-                       ip = None
+                    if device["mac"] is None:
+                        continue
+                    name = device["host"]["name"] if "host" in device else device["mac"].upper()
+                    ip = device["addr"] if "addr" in device and device["addr"] is not None else None
                     self._last_results.append(Device(device["mac"].upper(),name,ip,device["last_seen"]))   
                 else:
                     _LOGGER.debug("Ignoring device %s - last seen: %s" %(device["mac"],device["last_seen"]))
@@ -121,3 +124,4 @@ class FortigateDeviceTracker(DeviceScanner):
             return True
         del fortigate
         return False
+
