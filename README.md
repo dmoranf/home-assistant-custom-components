@@ -33,11 +33,11 @@ Fortigate's API returns a LAST_SEEN value instead of the device status (Online o
 ### Requisites
 
  - Tested on FortiOS 6.0.4
- - Device discovery is enabled on the Fortigate at interface level
+ - Device discovery enabled on the Fortigate at interface level
 
 ### Installation
 
-- Copy "fortigate" folder to your `<config dir>/custom_components/fortigate` directory.
+- Copy "fortigate_tracker" folder to your `<config dir>/custom_components/fortigate_tracker` directory.
 - Configure as shown below.
 - Restart HASS.
 

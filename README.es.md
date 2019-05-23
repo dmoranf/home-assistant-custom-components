@@ -34,7 +34,7 @@ No obstante desde la API dicho valor **no se devuelve**, y se obtiene un LAST_SE
 
 ### Instalación
 
-- Copiar el directorio "fortigate" a la carpeta de componentes personalizados: `<config dir>/custom_components/fortigate_tracker`
+- Copiar el directorio "fortigate_tracker" a la carpeta de componentes personalizados: `<config dir>/custom_components/fortigate_tracker`
 - Configurar como se muestra en el siguiente apartado.
 - Reiniciar HASS.
 
