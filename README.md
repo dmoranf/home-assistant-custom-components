@@ -32,7 +32,7 @@ Fortigate's API returns a LAST_SEEN value instead of the device status (Online o
 
 ### Requisites
 
- - Tested on FortiOS 6.0.4
+ - Tested on FortiOS 6.0.4 and Home Assistant 0.90.2
  - Device discovery enabled on the Fortigate at interface level
 
 ### Installation
@@ -55,6 +55,7 @@ device_tracker:
     password: !secret FG_PASSWORD
     consider_home: 300
     interval_seconds: 120
+    timeout: 120
     
 ```
 
@@ -64,8 +65,9 @@ Vars:
 - **port** (*Optional*): HTTPs service port (443 by default).
 - **username**: Username for API access.
 - **password**: Password for API access.
-- **consider_home**: (*Optional*) Timeout before considering the device out of home.
+- **consider_home**: (*Optional*) Timeout to set the device as "away" after the configured timeout.
 - **interval_seconds**: (*Optional*) Time between discovery request to Fotigate's API.
+- **timeout**: (*Optional*) Time to detect the device as offline, in seconds (Defaults to 60).
 
 ### Credits
 
