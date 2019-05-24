@@ -111,17 +111,20 @@ class FortigateDeviceTracker(DeviceScanner):
         if devices is not None:
             """ Resultados """
             for device in devices:
+                if device["mac"] is None:
+                    continue
+                name = device["host"]["name"] if "host" in device and "name" in device["host"] else device["mac"].upper()
+                ip = device["addr"] if "addr" in device else None
+
                 if int(device["last_seen"]) < self._timeout:
-                    _LOGGER.debug("Add device %s - last seen: %s" %(device["mac"],device["last_seen"]))
                     if device["mac"] is None:
+                        _LOGGER.error(device)
                         continue
-                    name = device["host"]["name"] if "host" in device else device["mac"].upper()
-                    ip = device["addr"] if "addr" in device and device["addr"] is not None else None
+                    _LOGGER.debug("Add device %s - %s - last seen: %s" %(device["mac"],name,device["last_seen"]))
                     self._last_results.append(Device(device["mac"].upper(),name,ip,device["last_seen"]))   
                 else:
-                    _LOGGER.debug("Ignoring device %s - last seen: %s" %(device["mac"],device["last_seen"]))
+                    _LOGGER.debug("Ignoring device %s - %s - last seen: %s" %(device["mac"],name,device["last_seen"]))
             del fortigate
             return True
         del fortigate
         return False
-

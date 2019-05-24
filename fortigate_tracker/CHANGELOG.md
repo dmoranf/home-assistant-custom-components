@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.1.2] - 2019-05-24
+### Added
+- Better Debugging messages.
+
 ## [0.1.1] - 2019-05-23
 ### Fixed
 - Exception errors on failed Fortigate request.
