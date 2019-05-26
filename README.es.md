@@ -4,7 +4,7 @@ This information is also available in [English](./README.md)
 Componentes
 ------------
    * [fortigate device tracker](#Fortigate-Device-Tracker): Integración con Fortigate Device detection vía WEB-API.
-   
+   * [Wattio Smart Home](#Wattio-Smart-Home): Integración de la plataforma Wattio Smart Home vía WEB-API.   
 ----------------------------
 
 ## Fortigate Device Tracker
@@ -69,4 +69,43 @@ Variables:
 
  - [FortiOS Tracker](https://community.home-assistant.io/t/fortios-device-tracker/28333/4) de [Mister_Slowhand](https://community.home-assistant.io/u/Mister_Slowhand): FortiOS Device Tracker mediante tabla ARP y SSH
 
+### Wattio Smart Home
+
+Integración de la plataforma Wattio Smart Home en Home Assistant a través de API. Este componente está en desarrollo, por favor, consulta el CHANGELOG.md para ver los últimos cambios.
+
+### Requisitos
+
+ - Client ID y Secret para usar la API de Wattio  (Solicitar a soporte de Wattio)
+ - Testeado en Home Assistant 0.90.2
+
+### Installación
+
+- Copia la carpeta "wattio" al directorio `<config dir>/custom_components/wattio`.
+- Configurar como se muestra más abajo.
+- Reiniciar HASS.
+- Seguir los pasos de configuración adicionales.
+
+### Configuración
+
+Añade la siguiente configuración al fichero `configuration.yaml`.
+
+```yaml
+# Wattio Sensors
+sensor:
+  - platform: wattio
+    scan_interval: 300
+```
+
+Vars:
+ - scan_interval: Intervalo de recolección de datos (y entre peticiones a la API)
+
+### Pasos adicionales
+
+ - Tras reiniciar Home Assistant, aparecerá una nueva notificación solicitando al usuario configurar el User ID y el Secret de la API. 
+ - Una vez configurado, aparecerá una nueva notificación solicitando autorizar la aplicación en Wattio.
+ - Seguir los enlaces, se redirigirá a una página de Wattio en la que solicitará usuario y contraseña. 
+ - Finalmente, cerrar la notificación (Finalizar) y refrescar el GUI para ver los nuevos sensores Finally.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_configuration.gif"></p>
 

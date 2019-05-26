@@ -5,6 +5,7 @@ This information is also available in [Spanish](./README.es.md)
 Components
 ------------
    * [fortigate device tracker](#Fortigate-Device-Tracker): Fortigate's Device detection through WEB-API.
+   * [Wattio Smart Home](#Wattio-Smart-Home): Wattio Smart Home platform integration (Under development).
       
 ----------------------------
 
@@ -76,4 +77,45 @@ Vars:
 
 ----------------------------
 
+### Wattio Smart Home
 
+Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check CHANGELOG.md for last updates..
+
+
+### Requisites
+
+ - Client ID and Secret for Wattio Platform (Request to wattio Support)
+ - Tested on Home Assistant 0.90.2
+
+### Installation
+
+- Copy "wattio" folder to your `<config dir>/custom_components/wattio` directory.
+- Configure as shown below.
+- Restart HASS.
+- Follow the adittional configuration steps.
+
+### Configuration
+
+Add the following to your `configuration.yaml`.
+
+```yaml
+# Wattio Sensors
+sensor:
+  - platform: wattio
+    scan_interval: 300
+```
+
+Vars:
+ - scan_interval: Time to refresh data and between requests to Wattio API.
+
+### Adittional steps
+
+ - At first launch a new notification is shown at the UI requesting the user to configure de user id and the secret
+ - After changing the configuration file, another notification should appear asking the user to authorize home assistant at wattio.
+ - Follow the link for authorization, a page requesting username and password from Wattio should be shown.
+ - Finally, close the notification and refresh your GUI.
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_configuration.gif"></p>
+
+  
