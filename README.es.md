@@ -107,5 +107,5 @@ Vars:
  - Finalmente, cerrar la notificación (Finalizar) y refrescar el GUI para ver los nuevos sensores Finally.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_configuration.gif"></p>
+<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_config.gif"></p>
 

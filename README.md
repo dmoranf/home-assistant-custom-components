@@ -79,7 +79,7 @@ Vars:
 
 ### Wattio Smart Home
 
-Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check CHANGELOG.md for last updates..
+Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check CHANGELOG.md for last updates.
 
 
 ### Requisites
@@ -116,6 +116,6 @@ Vars:
  - Finally, close the notification and refresh your GUI.
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_configuration.gif"></p>
+<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_config.gif"></p>
 
   
