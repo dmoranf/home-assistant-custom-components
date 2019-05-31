@@ -10,15 +10,16 @@ from . import (
 
 """ HASSIO imports """
 from homeassistant.util.json import load_json, save_json
-from homeassistant.helpers.entity import Entity
+#from homeassistant.helpers.entity import Entity
 from homeassistant.const import TEMP_CELSIUS
 from homeassistant.const import (CONF_SCAN_INTERVAL)
+from homeassistant.components.binary_sensor import (PLATFORM_SCHEMA,BinarySensorDevice)
 
 _LOGGER = logging.getLogger(__name__)
 
 def setup_platform(hass, config, add_devices, add_entities, discovery_info=None):
 	""" Wattio Sensor setup platform """
-	_LOGGER.debug("Wattio Sensor component running ...")
+	_LOGGER.debug("Wattio Binary Sensor component running ...")
 	config_path = hass.config.path(WATTIO_CONF_FILE)
 	_LOGGER.debug("Wattio config file: %s" %(config_path))
 	config_status = check_config_file(config_path)
@@ -46,24 +47,10 @@ def setup_platform(hass, config, add_devices, add_entities, discovery_info=None)
 		dev = []
 		""" Create Updater Object """
 		for device in registered_devices:
-			measurement = None
 			icon = None
-			if device["type"] == "pod":
-				icon = "mdi:power-socket-eu"
-				measurement = "Watt"
-				add_devices([WattioSensor(device["name"],device["type"],measurement,icon,apidata,device["ieee"])], True)
-				_LOGGER.debug("Adding device: %s" %(device["name"]))
-			if device["type"] == "bat":
-				measurement = "Watt"
-				add_devices([WattioSensor(device["name"],device["type"],measurement,icon,apidata,device["ieee"],device["channel"])], True)
-				_LOGGER.debug("Adding device: %s" %(device["name"]))
-			if device["type"] == "therm":
-				measurement = TEMP_CELSIUS
-				add_devices([WattioSensor(device["name"],device["type"],measurement,icon,apidata,device["ieee"])], True)
-				_LOGGER.debug("Adding device: %s" %(device["name"]))
-			if device["type"] == "motion":
-				measurement = TEMP_CELSIUS
-				add_devices([WattioSensor(device["name"],device["type"],measurement,icon,apidata,device["ieee"])], True)
+			if device["type"] == "door":
+				icon = "mdi:door"
+				add_devices([WattioBinarySensor(device["name"],device["type"],icon,apidata,device["ieee"])], True)
 				_LOGGER.debug("Adding device: %s" %(device["name"]))
 	else:
 		''' Not Authorized, need to complete OAUTH2 process '''
@@ -72,20 +59,16 @@ def setup_platform(hass, config, add_devices, add_entities, discovery_info=None)
 		hass.http.register_view(WattioRegisterView(hass,config,add_entities,config_file.get("client_id"),config_file.get("client_secret"),auth_uri))
 		request_oauth_completion(hass,config,add_devices,add_entities,auth_uri,setup_platform)
 
-class WattioSensor(Entity):
+class WattioBinarySensor(BinarySensorDevice):
 	""" Representation of Sensor """
-	def __init__(self, name, devtype, measurement,icon,apidata,ieee,channel=None):
+	def __init__(self, name, devtype, icon,apidata,ieee):
 		"""Initialize the sensor."""
 		self._name = name
 		self._state = None
-		self._measurement = measurement
 		self._icon = icon
 		self._apidata = apidata
 		self._ieee = ieee
 		self._devtype = devtype
-		self._channel = None
-		if channel is not None:
-			self._channel = channel-1
 		#self.type = resource_type
 		#self.update()
 
@@ -95,22 +78,18 @@ class WattioSensor(Entity):
 		return self._name
 
 	@property
-	def unit_of_measurement(self):
-		"""Return the unit of measurement."""
-		return self._measurement
-
-	@property
 	def icon(self):
 		"""Return the image of the sensor."""
 		return self._icon
 
 	@property
-	def state(self):
-		"""Return sensor state"""
+	def is_on(self):
+		"""Return state of the sensor"""
 		return self._state
 
 	def update(self):
 		"""Update sensor data."""
-		sensorvalue = self._apidata.update_data(self._name,self._devtype,self._ieee,self._channel)
-		_LOGGER.debug("Updating sensor %s: %s" %(self._name,sensorvalue))
+		sensorvalue = self._apidata.update_data(self._name,self._devtype,self._ieee)
+		_LOGGER.error(sensorvalue)
+		_LOGGER.debug("Updating binary sensor %s: %s" %(self._name,sensorvalue))
 		self._state = sensorvalue

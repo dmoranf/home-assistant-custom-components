@@ -2,7 +2,7 @@
 import logging
 import os
 import requests
-import json
+import json 
 import time
 from datetime import timedelta
 from datetime import datetime
@@ -32,16 +32,66 @@ WATTIO_CONF_FILE = 'wattio.conf'
 WATTIO_AUTH_CALLBACK_PATH = '/api/wattio/callback'
 WATTIO_CONF_FILE = 'wattio.conf'
 
-
 """ Internal config variables """
-_CONFIGURING = {}
 DEFAULT_CONFIG = {
     'client_id': 'CLIENT_ID_HERE',
     'client_secret': 'CLIENT_SECRET_HERE'
 }
 
+configuring = {}
+
 _LOGGER = logging.getLogger(__name__)
 
+def request_app_setup(hass, config, add_devices,add_entities, config_path, setup_platform, discovery_info=None):
+    global configuring
+    configurator = hass.components.configurator
+
+    def wattio_configuration_callback(callback_data):
+        config_status = check_config_file(hass.config.path(WATTIO_CONF_FILE))
+        if config_status == 2:
+            return False
+        elif config_status == 1:
+            configurator.notify_errors(configuring['wattio'],"test")
+            return False
+        else:
+            setup_platform(hass, config, add_devices, add_entities)
+
+    description = 'Wattio SmartHome no configurado</span>.<br /><br /> - Solicita tu Client y Secret ID a soporte de Wattio.<br />- Edita manualmente el fichero wattio.conf<br />- Añade el Client y Secret al fichero<br /><br />- Una vez finalizado, pulsa Siguiente<br /><br />Si algo no va bien revisa los logs de HA :)<br />'
+    submit = "Siguiente"
+    configuring['wattio'] = configurator.request_config('Wattio', wattio_configuration_callback,description=description, submit_caption=submit)
+
+def request_oauth_completion(hass,config,add_devices,add_entities,auth_uri,setup_platform, discovery_info=None):
+    global configuring
+    """Request user complete WATTIO OAuth2 flow."""
+    configurator = hass.components.configurator
+
+    def wattio_configuration_callback(callback_data):
+        """Check if token is configured else show the notification"""
+        config_file = load_json(hass.config.path(WATTIO_CONF_FILE))
+        token = config_file.get(ATTR_ACCESS_TOKEN)
+        if token is None:
+           return False
+        else:
+           setup_platform(hass, config, add_devices, add_entities)
+
+
+    if "wattio" in configuring:
+        configurator.notify_errors(configuring['wattio'],"Fallo el registro, intentalo de nuevo.")
+        return
+
+    start_url = '{}{}'.format(hass.config.api.base_url, WATTIO_AUTH_START)
+    description = 'Para finalizar autoriza el componente en Wattio:<br /><br /> <a href="{}" target="_blank">{}</a>'.format(start_url,start_url)
+    configuring['wattio'] = configurator.request_config('Wattio',wattio_configuration_callback,description=description,submit_caption="Finalizar")
+
+
+
+
+def get_auth_uri(hass,client_id):
+    """ Returns Wattio Auth URI """
+	#state = "WATTIOHASSIOTESTING2" # Change to RANDOM
+    redirect_uri = '{}{}'.format(hass.config.api.base_url,WATTIO_AUTH_START)
+    authorize_uri = WATTIO_AUTH_URI+'?response_type=code&client_id='+client_id+'&redirect_uri='+redirect_uri
+    return authorize_uri
 
 def check_config_file(configpath):
     """ check if config file exists | 0 All OK | 1 File does not exist | 2 Not configued """
@@ -108,10 +158,10 @@ class WattioRegisterView(HomeAssistantView):
 class wattioAPI:
     def __init__(self,interval,token=None):
         self._schedule = interval
-        self._updated = None
         self._value = None
         self._data = None
         self._token = token
+        self._updated = None
 
     def get_token(self,code,client_id,client_secret):
         """ Get Token from Wattio API, requieres Auth Code, Client ID and Secret """
@@ -138,6 +188,23 @@ class wattioAPI:
             _LOGGER.error("Could't get TOKEN from Wattio API")
             _LOGGER.error(e)
 
+    def get_device_availability(self,ieee):
+        if self._data is not None:
+            _availability = False
+            try:
+                device_status = json.loads(self._data)
+                for device in device_status:
+                    if device["ieee"] == ieee:
+                        _availability = True
+            except:
+                _LOGGER.error("API Data problems, couldn't check availability status")
+        else:
+            _LOGGER.error("No API DATA, couldn't check availability data for %s" %(ieee))
+        if _availability == True:
+            _LOGGER.debug("Device %s is available" %(ieee))
+        else:
+            _LOGGER.debug("Device %s is NOT available" %(ieee))
+        return _availability
 
     def get_devices(self):
         """ Get device info from Wattio API """
@@ -173,15 +240,7 @@ class wattioAPI:
     def update_switch_status(self,name,devtype,ieee):
         """ Get switch status (On/Off) """
         _LOGGER.error("Updater request for %s" % (str(name)))
-        minutes = self._schedule.total_seconds()/60
-        if self._updated is not None:		
-            nextupdate = self._updated + timedelta(minutes=int(minutes))
-        if self._data is None or (self._updated is not None and datetime.now() >= nextupdate):			
-            self._updated = datetime.now()
-            self.get_data()
-        else:
-           
-           _LOGGER.error("Updater:No hace falta actuaizar")
+        self.get_data()
         if devtype == "pod":
             device_status = json.loads(self._data)
             for device in device_status:
@@ -197,39 +256,48 @@ class wattioAPI:
         ''' Check if update of cache is needed '''
         if self._updated is not None:		
             nextupdate = self._updated + timedelta(minutes=int(minutes))
+            _LOGGER.debug ("Updated: %s - Next Update: %s" %(self._updated,nextupdate))
         if self._data is None or (self._updated is not None and datetime.now() >= nextupdate):			
             self._updated = datetime.now()
             self.get_data()
         else:
-            ''' 
             _LOGGER.debug("Update request for %s: Using cached data" %(str(name)))
-            '''
         if self._data is not None:
             device_status = json.loads(self._data)
-            if channel is not None and devtype == "bat":
-                ''' BAT device get channel data '''
-                for device in device_status:
-                    if device["ieee"]==ieee:
-                        return  device["status"]["consumption"][channel]	
-            elif devtype == "therm":
-                ''' THERMIC data get current temp '''		
-                for device in device_status:
-                    if device["ieee"]==ieee:
-                        return device["status"]["current"]		
-            elif devtype == "motion":
-                ''' MOTION data get current temp '''				
-                for device in device_status:
-                    if device["ieee"]==ieee:
-                        return device["status"]["temperature"]	
-            elif devtype == "pod":
-                ''' POD data get current WAT consumption '''
-                for device in device_status:
-                    if device["ieee"]==ieee:
-                        return device["status"]["consumption"]	
-            else:
-                ''' Other devices return 0 '''
-                return 0
+            try:
+                if channel is not None and devtype == "bat":
+                    ''' BAT device get channel data '''
+                    for device in device_status:
+                        if device["ieee"]==ieee:
+                            return  device["status"]["consumption"][channel]	
+                elif devtype == "therm":
+                    ''' THERMIC data get current temp '''		
+                    for device in device_status:
+                        if device["ieee"]==ieee:
+                            return device["status"]["current"]		
+                elif devtype == "motion":
+                    ''' MOTION data get current temp '''				
+                    for device in device_status:
+                        if device["ieee"]==ieee:
+                            return device["status"]["temperature"]	
+                elif devtype == "pod":
+                    ''' POD data get current WAT consumption '''
+                    for device in device_status:
+                        if device["ieee"]==ieee:
+                            return device["status"]["consumption"]
+                elif devtype == "door":
+                    for device in device_status:
+                        if device["ieee"]==ieee:
+                            return device["status"]["opened"]	
+                else:
+                    ''' Other unknown devices return 0 '''
+                    return 0
+            except Exception as e:
+                _LOGGER.error("API had a problem and didn't return expected data ... ")
+
+            return 0
         else:
+            _LOGGER.error("API had a problem and didn't return any data ... ")
             return 0
 
     def get_data(self):

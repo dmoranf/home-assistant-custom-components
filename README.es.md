@@ -8,6 +8,8 @@ Componentes
 ----------------------------
 
 ## Fortigate Device Tracker
+<img src="https://img.shields.io/badge/Version-0.1.2-green.svg" />
+
 Esta solución se basa en el descubrimiento de dispositivos en base a la información que el propio firewall Fortigate genera mediante descubrimiento y análisis del tráfico.
 
 El inventario de dispositivos se encuentra bajo el menú  `User & Device -> Device inventory`:
@@ -70,8 +72,11 @@ Variables:
  - [FortiOS Tracker](https://community.home-assistant.io/t/fortios-device-tracker/28333/4) de [Mister_Slowhand](https://community.home-assistant.io/u/Mister_Slowhand): FortiOS Device Tracker mediante tabla ARP y SSH
 
 ### Wattio Smart Home
+<img src="https://img.shields.io/badge/Version-0.1.1-green.svg" />
 
-Integración de la plataforma Wattio Smart Home en Home Assistant a través de API. Este componente está en desarrollo, por favor, consulta el CHANGELOG.md para ver los últimos cambios.
+Integración de la plataforma Wattio Smart Home en Home Assistant a través de API. Este componente está en desarrollo, por favor, consulta el [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) para ver los últimos cambios.
+
+Link: [Wattio SmartHome](https://wattio.com)
 
 ### Requisitos
 
@@ -94,6 +99,16 @@ Añade la siguiente configuración al fichero `configuration.yaml`.
 sensor:
   - platform: wattio
     scan_interval: 300
+
+# Wattio Pods
+switch:
+  - platform: wattio
+    scan_interval: 300
+
+# Wattio Doors
+binary_sensor:
+  - platform: wattio
+    scan_interval: 300
 ```
 
 Vars:
@@ -101,10 +116,16 @@ Vars:
 
 ### Pasos adicionales
 
- - Tras reiniciar Home Assistant, aparecerá una nueva notificación solicitando al usuario configurar el User ID y el Secret de la API. 
+ - Tras reiniciar Home Assistant, aparecerá una nueva notificación solicitando al usuario configurar el User ID y el Secret de la API.
+ - Se creará el fichero de configuración "wattio.conf" de forma automática.
+ - Es necesario modificar el fichero "wattio.conf" y añadir el user id y secret. 
+   
+   > El soporte de Wattio deberá facilitarte el user id y secret. Estas credenciales NO son tu usuario y contraseña de acceso   
+
  - Una vez configurado, aparecerá una nueva notificación solicitando autorizar la aplicación en Wattio.
  - Seguir los enlaces, se redirigirá a una página de Wattio en la que solicitará usuario y contraseña. 
  - Finalmente, cerrar la notificación (Finalizar) y refrescar el GUI para ver los nuevos sensores Finally.
+
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_config.gif"></p>

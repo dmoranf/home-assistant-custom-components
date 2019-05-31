@@ -10,6 +10,7 @@ Components
 ----------------------------
 
 ## Fortigate Device Tracker
+<img src="https://img.shields.io/badge/Version-0.1.2-green.svg" />
 
 If enabled, Fortigate unit tracks the status and gathers different information about the devices connected to your network. This component grabs this information via Fortigate's API requests.
 
@@ -78,9 +79,11 @@ Vars:
 ----------------------------
 
 ### Wattio Smart Home
+<img src="https://img.shields.io/badge/Version-0.1.1-green.svg" />
 
-Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check CHANGELOG.md for last updates.
+Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) for last updates.
 
+Link: [Wattio SmartHome](https://wattio.com/)
 
 ### Requisites
 
@@ -103,6 +106,16 @@ Add the following to your `configuration.yaml`.
 sensor:
   - platform: wattio
     scan_interval: 300
+
+# Wattio Pods
+switch:
+  - platform: wattio
+    scan_interval: 300
+
+# Wattio Doors
+binary_sensor:
+  - platform: wattio
+    scan_interval: 300
 ```
 
 Vars:
@@ -110,10 +123,16 @@ Vars:
 
 ### Adittional steps
 
- - At first launch a new notification is shown at the UI requesting the user to configure de user id and the secret
+ - At first launch a new notification is shown at the UI requesting the user to configure de user id and the secret. 
+ - The configuration file "wattio.conf" is created automatically.
+ - Change user id and secret in "wattio-conf".
+
+   > User id and secret MUST be supplied by wattio team (This is not your user and password!)
+
  - After changing the configuration file, another notification should appear asking the user to authorize home assistant at wattio.
  - Follow the link for authorization, a page requesting username and password from Wattio should be shown.
  - Finally, close the notification and refresh your GUI.
+
 
 <p align="center">
 <img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_config.gif"></p>

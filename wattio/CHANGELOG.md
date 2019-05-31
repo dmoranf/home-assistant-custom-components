@@ -2,9 +2,23 @@
 Under development !!
 
 ## [Unreleased]
-- Support for Wattio PODs as switchs (final testing ...)
 - Support for Wattio Thermic
+- Global cache for all components??
 - Code cleanup and optimization
+
+## [0.1.1] - 2019-05-31
+### Added
+- Support for Wattio PODs
+- POD state detection (Available / Not available)
+- Support for Wattio Doors
+
+### Changed
+- Some interface messages changes. (First setup)
+- Better debugging/error log messages.
+- Some code moved to __init__.py for reutilization in multiple components.
+
+### Fixed
+- Some excepcion handling (work pending in progress ...)
 
 ## [0.1.0] - 2019-05-26
 ### Added
