@@ -85,6 +85,23 @@ Wattio Smart Home platform integration for Home Assistant throught Wattio's API.
 
 Link: [Wattio SmartHome](https://wattio.com/)
 
+### Screenshots
+
+ - Wattio Sensors (Bat & Thermic examples):
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_bat_sensor.png" width="300px">   &nbsp;&nbsp;  <img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_thermic_sensor.png" width="300px"></p>
+
+- Wattio Binary Sensors (Door example):
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_door_sensor.png" width="300px"></p>
+
+- Wattio Switch (Pod example):
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/dmoranf/home-assistant-custom-components/master/_screenshots/wattio_pod_switch.png" width="300px"></p>
+
 ### Requisites
 
  - Client ID and Secret for Wattio Platform (Request to wattio Support)
