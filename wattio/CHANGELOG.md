@@ -6,6 +6,13 @@ Under development !!
 - Global cache for all components??
 - Code cleanup and optimization
 
+## [0.1.2] - 2019-06-05
+### Added
+- Support for Motion's presence sensor
+
+### Changed
+- Better code formatting and linting
+
 ## [0.1.1] - 2019-05-31
 ### Added
 - Support for Wattio PODs

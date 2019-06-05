@@ -10,7 +10,7 @@ Components
 ----------------------------
 
 ## Fortigate Device Tracker
-<img src="https://img.shields.io/badge/Version-0.1.2-green.svg" />
+<img src="https://img.shields.io/badge/Version-0.1.3-green.svg" />
 
 If enabled, Fortigate unit tracks the status and gathers different information about the devices connected to your network. This component grabs this information via Fortigate's API requests.
 
@@ -79,7 +79,7 @@ Vars:
 ----------------------------
 
 ### Wattio Smart Home
-<img src="https://img.shields.io/badge/Version-0.1.1-green.svg" />
+<img src="https://img.shields.io/badge/Version-0.1.2-green.svg" />
 
 Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) for last updates.
 

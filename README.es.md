@@ -8,7 +8,7 @@ Componentes
 ----------------------------
 
 ## Fortigate Device Tracker
-<img src="https://img.shields.io/badge/Version-0.1.2-green.svg" />
+<img src="https://img.shields.io/badge/Version-0.1.3-green.svg" />
 
 Esta solución se basa en el descubrimiento de dispositivos en base a la información que el propio firewall Fortigate genera mediante descubrimiento y análisis del tráfico.
 
@@ -72,7 +72,7 @@ Variables:
  - [FortiOS Tracker](https://community.home-assistant.io/t/fortios-device-tracker/28333/4) de [Mister_Slowhand](https://community.home-assistant.io/u/Mister_Slowhand): FortiOS Device Tracker mediante tabla ARP y SSH
 
 ### Wattio Smart Home
-<img src="https://img.shields.io/badge/Version-0.1.1-green.svg" />
+<img src="https://img.shields.io/badge/Version-0.1.2-green.svg" />
 
 Integración de la plataforma Wattio Smart Home en Home Assistant a través de API. Este componente está en desarrollo, por favor, consulta el [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) para ver los últimos cambios.
 

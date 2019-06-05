@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.1.3] - 2019-06-05
+### Changed
+- Better code formatting and linting
+
 ## [0.1.2] - 2019-05-24
 ### Added
 - Better Debugging messages.
