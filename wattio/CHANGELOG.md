@@ -1,10 +1,22 @@
 # Changelog
 Under development !!
 
-## [Unreleased]
-- Support for Wattio Thermic
-- Global cache for all components??
+## [0.2.0]
+- Testing support for Wattio Thermic 
+- Code changed to platform and async methods, only one API request for all devices
 - Code cleanup and optimization
+
+###IMPORTANT UPGRADE INFO 
+No need to change wattio.conf or re-authorize the app, but the way the platform is configured is CHANGED:
+
+New configuration.yaml example:
+
+```yaml
+wattio:
+  scan_interval: 60 (OPTIONAL: time in seconds, defaults to 30)
+  therm_max_temp: 30 (OPTIONAL: Max temp for climate component, defaults to 30)  
+  therm_min_temp: 10 (OPTIONAL: Min temp for climate component, defaults to 10)
+```
 
 ## [0.1.2] - 2019-06-05
 ### Added
