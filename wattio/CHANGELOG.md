@@ -6,7 +6,7 @@ Under development !!
 - Code changed to platform and async methods, only one API request for all devices
 - Code cleanup and optimization
 
-###IMPORTANT UPGRADE INFO 
+### IMPORTANT UPGRADE INFO 
 No need to change wattio.conf or re-authorize the app, but the way the platform is configured is CHANGED:
 
 New configuration.yaml example:
