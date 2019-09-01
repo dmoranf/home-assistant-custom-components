@@ -1,100 +1,79 @@
 """Platform for Wattio integration testing."""
 import logging
 
-from homeassistant.util.json import load_json, save_json
-from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.components.binary_sensor import BinarySensorDevice
+from homeassistant.const import ATTR_BATTERY_LEVEL, STATE_OK, STATE_UNAVAILABLE
 
-from . import (wattioAPI, WattioRegisterView, check_config_file, get_auth_uri,
-               request_app_setup, request_oauth_completion, ATTR_ACCESS_TOKEN,
-               WATTIO_CONF_FILE, DEFAULT_CONFIG, CONFIGURING
-               )
+from . import DOMAIN, WattioDevice
+
 
 _LOGGER = logging.getLogger(__name__)
 
-def setup_platform(hass, config, add_devices, add_entities, discovery_info=None):
-    """Wattio Sensor setup platform."""
+
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
+    """Configure Wattio Binary Sensor."""
     _LOGGER.debug("Wattio Binary Sensor component running ...")
-    config_path = hass.config.path(WATTIO_CONF_FILE)
-    _LOGGER.debug("Wattio config file: %s", config_path)
-    config_status = check_config_file(config_path)
-    # Check Wattio file configuration status
-    if config_status == 2:
-        request_app_setup(hass,
-                          config,
-                          add_devices,
-                          add_entities,
-                          config_path,
-                          setup_platform,
-                          discovery_info=None)
-        return False
-    elif config_status == 1:
-        _LOGGER.error("Config file doesn't exist, creating ...")
-        save_json(config_path, DEFAULT_CONFIG)
-        request_app_setup(hass,
-                          config,
-                          add_devices,
-                          add_entities,
-                          config_path,
-                          setup_platform,
-                          discovery_info=None)
-        return False
-    if "wattio" in CONFIGURING:
-        hass.components.configurator.request_done(CONFIGURING.pop("wattio"))
+    if discovery_info is None:
+        _LOGGER.error("No Binary Sensor device(s) discovered")
+        return
+    devices = []
+    for device in hass.data[DOMAIN]["devices"]:
+        icon = None
+        if device["type"] == "door":
+            icon = "mdi:door"
+            devices.append(WattioBinarySensor(device["name"],
+                                              device["type"],
+                                              icon,
+                                              device["ieee"]
+                                              ))
+            _LOGGER.debug("Adding device: %s", device["name"])
+        if device["type"] == "motion":
+            icon = "mdi:adjust"
+            devices.append(WattioBinarySensor(device["name"],
+                                              "motion",
+                                              icon,
+                                              device["ieee"]
+                                              ))
+            _LOGGER.debug("Adding device: %s", device["name"])
+    async_add_entities(devices)
 
-    config_file = load_json(config_path)
-    token = config_file.get(ATTR_ACCESS_TOKEN)
-    #Wattio Token does not expire
-    #expires_at = config_file.get(ATTR_LAST_SAVED_AT)
-    if token is not None:
-        apidata = wattioAPI(config.get(CONF_SCAN_INTERVAL), token)
-        registered_devices = apidata.get_devices()
-        # Create Updater Object
-        for device in registered_devices:
-            icon = None
-            if device["type"] == "door":
-                icon = "mdi:door"
-                add_devices([WattioBinarySensor(device["name"],
-                                                device["type"],
-                                                icon,
-                                                apidata,
-                                                device["ieee"]
-                                                )], True)
-                _LOGGER.debug("Adding device: %s", device["name"])
-            if device["type"] == "motion":
-                icon = "mdi:adjust"
-                add_devices([WattioBinarySensor(device["name"],
-                                                "motionBinary",
-                                                icon,
-                                                apidata,
-                                                device["ieee"]
-                                                )], True)
-                _LOGGER.debug("Adding device: %s", device["name"])
-    else:
-        # Not Authorized, need to complete OAUTH2 process
-        auth_uri = get_auth_uri(hass, config_file.get("client_id"))
-        _LOGGER.error("No token configured, complete OAUTH2 authorization: %s", auth_uri)
-        hass.http.register_view(WattioRegisterView(hass,
-                                                   config,
-                                                   add_entities,
-                                                   config_file.get("client_id"),
-                                                   config_file.get("client_secret"),
-                                                   auth_uri))
-        request_oauth_completion(hass, config, add_devices, add_entities, auth_uri, setup_platform)
 
-class WattioBinarySensor(BinarySensorDevice):
+class WattioBinarySensor(WattioDevice, BinarySensorDevice):
     """Representation of Sensor."""
 
-    def __init__(self, name, devtype, icon, apidata, ieee):
+    def __init__(self, name, devtype, icon, ieee):
         """Initialize the sensor."""
+        self._pre = "bs_"
         self._name = name
         self._state = None
         self._icon = icon
-        self._apidata = apidata
+        self._apidata = None
         self._ieee = ieee
         self._devtype = devtype
-        #self.type = resource_type
-        #self.update()
+        self._battery = None
+        self._data = None
+        self._channel = None
+
+    @property
+    def available(self):
+        """Return availability."""
+        if self._data is not None:
+            status = 0
+            for device in self._data:
+                if device["ieee"] == self._ieee:
+                    status = 1
+                    break
+            if status == 1:
+                _LOGGER.debug("Device %s - available", self._name)
+                return STATE_OK
+            else:
+                _LOGGER.debug("Device %s - NOT available", self._name)
+                return STATE_UNAVAILABLE
+
+    @property
+    def should_poll(self):
+        """No polling needed."""
+        return False
 
     @property
     def name(self):
@@ -111,8 +90,38 @@ class WattioBinarySensor(BinarySensorDevice):
         """Return state of the sensor."""
         return self._state
 
-    def update(self):
+    @property
+    def device_state_attributes(self):
+        """Return the state attributes of this device."""
+        attr = {}
+        if self._battery is not None:
+            attr[ATTR_BATTERY_LEVEL] = self.get_battery_level()
+        return attr
+
+    def get_battery_level(self):
+        """Return device battery level."""
+        if self._battery is not None:
+            battery_level = round((self._battery*100)/4)
+            return battery_level
+
+    async def async_update(self):
         """Update sensor data."""
-        sensorvalue = self._apidata.update_data(self._name, self._devtype, self._ieee)
-        _LOGGER.debug("Updating binary sensor %s: %s", self._name, sensorvalue)
-        self._state = sensorvalue
+        # Parece que no tira con las CONST devolver 0 o 1
+        self._data = self.hass.data[DOMAIN]["data"]
+        _LOGGER.error("ACTUALIZANDO SENSOR BINARIO %s - %s", self._name, self._ieee)
+        if self._data is not None:
+            for device in self._data:
+                if device["ieee"] == self._ieee:
+                    self._battery = device["status"]["battery"]
+                    if device["type"] == "motion":
+                        _LOGGER.debug(device["status"]["presence"])
+                        self._state = device["status"]["presence"]
+                    elif device["type"] == "door":
+                        self._state = device["status"]["opened"]
+                        _LOGGER.debug(device["status"]["opened"])
+                    break
+        # testvalue = self._wattiodata.update_data(hass, self._name, self._devtype, self._ieee)
+            _LOGGER.debug(self._state)
+            return self._state
+        else:
+            return False

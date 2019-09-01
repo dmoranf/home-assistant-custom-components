@@ -1,112 +1,78 @@
 """Platform for Wattio integration testing."""
 import logging
 
-from homeassistant.util.json import load_json, save_json
-from homeassistant.const import CONF_SCAN_INTERVAL
 from homeassistant.components.light import Light
+from homeassistant.const import STATE_OK, STATE_ON, STATE_UNAVAILABLE
 
-from . import (wattioAPI, WattioRegisterView, check_config_file, get_auth_uri,
-               request_app_setup, request_oauth_completion, ATTR_ACCESS_TOKEN,
-               WATTIO_CONF_FILE, DEFAULT_CONFIG, CONFIGURING
-              )
+from . import DOMAIN, WattioDevice, wattioAPI
+
 
 _LOGGER = logging.getLogger(__name__)
 
-def setup_platform(hass, config, add_devices, add_entities, discovery_info=None):
+
+async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     """Wattio Sensor setup platform."""
     _LOGGER.debug("Wattio Switch component running ...")
-    config_path = hass.config.path(WATTIO_CONF_FILE)
-    _LOGGER.debug("Wattio config file: %s", config_path)
-    config_status = check_config_file(config_path)
-    # Check Wattio file configuration status
-    if config_status == 2:
-        request_app_setup(hass,
-                          config,
-                          add_devices,
-                          add_entities,
-                          config_path,
-                          setup_platform,
-                          discovery_info=None)
-        return False
-    elif config_status == 1:
-        _LOGGER.error("Config file doesn't exist, creating ...")
-        save_json(config_path, DEFAULT_CONFIG)
-        request_app_setup(hass,
-                          config,
-                          add_devices,
-                          add_entities,
-                          config_path,
-                          setup_platform,
-                          discovery_info=None)
-        return False
-    if "wattio" in CONFIGURING:
-        hass.components.configurator.request_done(CONFIGURING.pop("wattio"))
-
-    config_file = load_json(config_path)
-    token = config_file.get(ATTR_ACCESS_TOKEN)
-    #Wattio Token does not expire
-    #expires_at = config_file.get(ATTR_LAST_SAVED_AT)
-    if token is not None:
-        apidata = wattioAPI(config.get(CONF_SCAN_INTERVAL), token)
-        registered_devices = apidata.get_devices()
-        # Create Updater Object
-        for device in registered_devices:
-            icon = None
-            if device["type"] == "pod":
-                add_devices([WattioSwitch(device["name"],
-                                          device["type"],
-                                          icon,
-                                          apidata,
-                                          device["ieee"]
-                                          )], True)
-                _LOGGER.debug("Adding device: %s", device["name"])
-    else:
-        # Not Authorized, need to complete OAUTH2 process
-        auth_uri = get_auth_uri(hass, config_file.get("client_id"))
-        _LOGGER.error("No token configured, complete OAUTH2 authorization: %s", auth_uri)
-        hass.http.register_view(WattioRegisterView(hass,
-                                                   config,
-                                                   add_entities,
-                                                   config_file.get("client_id"),
-                                                   config_file.get("client_secret"),
-                                                   auth_uri))
-        request_oauth_completion(hass, config, add_devices, add_entities, auth_uri, setup_platform)
+    if discovery_info is None:
+        _LOGGER.error("No Sensor(s) discovered")
+        return
+    devices = []
+    # Create Updater Object
+    for device in hass.data[DOMAIN]["devices"]:
+        icon = None
+        if device["type"] == "pod":
+            devices.append(WattioSwitch(device["name"],
+                                        device["type"],
+                                        icon,
+                                        device["ieee"]
+                                        ))
+            _LOGGER.debug("Adding device: %s", device["name"])
+    async_add_entities(devices)
 
 
-
-class WattioSwitch(Light):
+class WattioSwitch(WattioDevice, Light):
     """Representation of Sensor."""
 
-    def __init__(self, name, devtype, icon, apidata, ieee):
+    def __init__(self, name, devtype, icon, ieee):
         """Initialize the sensor."""
+        self._pre = "sw_"
         self._name = name
         self._is_on = None
         self._state = None
         self._icon = icon
-        self._apidata = apidata
         self._ieee = ieee
+        self._data = None
         self._devtype = devtype
         self._current_consumption = None
-        #self.type = resource_type
-        if self._state is None:
-            self.update()
+        self._channel = None
 
     @property
     def is_on(self):
         """Return is_on status."""
         return self._state
 
-    def turn_on(self):
+    async def async_turn_on(self):
         """Turn On method."""
-        self._state = 1
+        wattio = wattioAPI(self.hass.data[DOMAIN]["token"])
         _LOGGER.error("Encendiendo")
-        return self._apidata.set_switch_status(self._ieee, "on")
+        wattio.set_switch_status(self._ieee, "on")
+        self._state = STATE_ON
+        return
+        # return self._apidata.set_switch_status(self._ieee, "on", self.hass.[DOMAIN]["token"])
 
-    def turn_off(self):
+    async def async_turn_off(self):
         """Turn Off method."""
-        self._state = 0
+        wattio = wattioAPI(self.hass.data[DOMAIN]["token"])
         _LOGGER.error("Apagando")
-        return self._apidata.set_switch_status(self._ieee, "off")
+        wattio.set_switch_status(self._ieee, "off")
+        self._state = False
+        return
+        # return self._apidata.set_switch_status(self._ieee, "off", self.hass.[DOMAIN]["token"])
+
+    @property
+    def should_poll(self):
+        """No polling needed."""
+        return False
 
     @property
     def name(self):
@@ -116,12 +82,34 @@ class WattioSwitch(Light):
     @property
     def available(self):
         """Return availability."""
-        availability = self._apidata.get_device_availability(self._ieee)
-        return availability
+        if self._data is not None:
+            status = 0
+            for device in self._data:
+                if device["ieee"] == self._ieee:
+                    status = 1
+                    break
+            if status == 1:
+                _LOGGER.debug("Device %s - available", self._name)
+                return STATE_OK
+            else:
+                _LOGGER.debug("Device %s - NOT available", self._name)
+                return STATE_UNAVAILABLE
 
-    def update(self):
+    async def async_update(self):
         """Return sensor state."""
-        switchvalue = self._apidata.update_switch_status(self._name, self._devtype, self._ieee)
-        _LOGGER.debug("Updating switch %s: %s", self._name, switchvalue)
-        self._state = switchvalue
-        return self._state
+        self._data = self.hass.data[DOMAIN]["data"]
+        _LOGGER.error("ACTUALIZANDO SWITCH %s - %s", self._name, self._ieee)
+        if self._data is not None:
+            for device in self._data:
+                if device["ieee"] == self._ieee:
+                    _LOGGER.debug(device["status"]["state"])
+                    if device["status"]["state"] == 1:
+                        self._state = STATE_ON
+                    else:
+                        self._state = False
+                    break
+        # testvalue = self._wattiodata.update_data(hass, self._name, self._devtype, self._ieee)
+            _LOGGER.debug(self._state)
+            return self._state
+        else:
+            return False
