@@ -1,7 +1,15 @@
 # Changelog
 Under development !!
 
-## [0.2.0]
+## TODO
+- Climate needs more testing !!!
+
+## [0.2.1] - 2019-09-01
+### Fixed
+- Climate implementantion on Hass >= 0.96 has changed and it's not backward compatible, new climate.py is compatible on HASS >= 0.96
+- There is a copy of backward compatible climate.py (climate.py.pre_096) for HASS >= 0.92 and < 0.96
+
+## [0.2.0] - 2019-09-01
 ### Added
 - Support for Wattio Thermic. Need extra testing on winter time ;)
 - Battery status for supported devices
