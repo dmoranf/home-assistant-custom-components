@@ -34,7 +34,7 @@ Fortigate's API returns a LAST_SEEN value instead of the device status (Online o
 
 ### Requisites
 
- - Tested on FortiOS 6.0.4 and Home Assistant 0.90.2
+ - Tested on FortiOS 6.0.4 and Home Assistant >= 0.90.2 (Tested on 0.98.2)
  - Device discovery enabled on the Fortigate at interface level
 
 ### Installation
@@ -63,13 +63,15 @@ device_tracker:
 
 Vars:
 
-- **host**: IP Address / Host name of Fortigate's management interface.
-- **port** (*Optional*): HTTPs service port (443 by default).
-- **username**: Username for API access.
-- **password**: Password for API access.
-- **consider_home**: (*Optional*) Timeout to set the device as "away" after the configured timeout.
-- **interval_seconds**: (*Optional*) Time between discovery request to Fotigate's API.
-- **timeout**: (*Optional*) Time to detect the device as offline, in seconds (Defaults to 60).
+| Var | Description |
+| --- | --- |
+| **host** | IP Address / Host name of Fortigate's management interface. |
+| **port** | (*Optional*)  HTTPs service port (443 by default). |
+| **username** | Username for API access. |
+| **password** | Password for API access. |
+| **consider_home** | (*Optional*) Timeout to set the device as "away" after the configured timeout. |
+| **interval_seconds** | (*Optional*) Time between discovery request to Fotigate's API. |
+| **timeout** | (*Optional*) Time to detect the device as offline, in seconds (Defaults to 60). |
 
 ### Credits
 
@@ -105,7 +107,7 @@ Link: [Wattio SmartHome](https://wattio.com/)
 ### Requisites
 
  - Client ID and Secret for Wattio Platform (Request to wattio Support)
- - Tested on Home Assistant 0.90.2
+ - Works on Home Assistant >= 0.90.2 (Tested on 0.98.2)
 
 ### Installation
 
@@ -135,8 +137,6 @@ Vars:
 | *scan_interval* | OPTIONAL - Time (in seconds) between data updates , defaults to 30 seconds |
 | *therm_max_temp* | OPTIONAL - Max configurable temp for thermic devices, defaults to 30 degrees |
 | *therm_min_temp* | OPTIONAL - Min configurable temp for thermic devices, defaults to 10 degrees |
-
- - scan_interval: Time to refresh data and between requests to Wattio API.
 
 ### Adittional steps
 

@@ -60,13 +60,16 @@ device_tracker:
 
 Variables:
 
-- **host**: Dirección IP o nombre del interface de gestión del dispositivo Fortigate.
-- **port** (*Opcional*): Puerto del servicio https (443 por defecto).
-- **username**: Usuario con permisos de acceso a la API del fortigate.
-- **password**: Contraseña de acceso.
-- **consider_home**: (*Opcional*) Tiempo que debe transcurrir para marcar el dispositivo como "fuera" una vez marcado como offline (timeout).
-- **interval_seconds**: (*Opcional*) Tiempo entre peticiones a la API del equipo Fortinet.
-- **timeout**: (*Optional*) Tiempo para marcar el dispositivo como desconectado, en segundos (60 por defecto).
+| Variable | Descripción |
+| --- | --- | 
+| **host** | Dirección IP o nombre del interface de gestión del dispositivo Fortigate. |
+| **port** | (*Opcional*): Puerto del servicio https (443 por defecto). | 
+| **username** | Usuario con permisos de acceso a la API del fortigate. |
+| **password** | Contraseña de acceso. | 
+| **consider_home** | (*Opcional*) Tiempo que debe transcurrir para marcar el dispositivo como "fuera" una vez marcado como offline (timeout). |
+| **interval_seconds** | (*Opcional*) Tiempo entre peticiones a la API del equipo Fortinet. | 
+| **timeout** | (*Optional*) Tiempo para marcar el dispositivo como desconectado, en segundos (60 por defecto). |
+
 ### Créditos
 
  - [FortiOS Tracker](https://community.home-assistant.io/t/fortios-device-tracker/28333/4) de [Mister_Slowhand](https://community.home-assistant.io/u/Mister_Slowhand): FortiOS Device Tracker mediante tabla ARP y SSH
