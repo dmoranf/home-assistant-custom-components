@@ -132,7 +132,7 @@ class WattioSensor(WattioDevice, Entity):
     async def async_update(self):
         """Update sensor data."""
         self._data = self.hass.data[DOMAIN]["data"]
-        _LOGGER.error("ACTUALIZANDO SENSOR %s - %s", self._name, self._ieee)
+        _LOGGER.debug("ACTUALIZANDO SENSOR %s - %s", self._name, self._ieee)
         if self._data is not None:
             self._available = 0
             for device in self._data:
