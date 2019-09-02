@@ -79,7 +79,7 @@ Vars:
 ----------------------------
 
 ### Wattio Smart Home
-<img src="https://img.shields.io/badge/Version-0.1.2-green.svg" />
+<img src="https://img.shields.io/badge/Version-0.2.0-green.svg" />
 
 Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) for last updates.
 
@@ -118,24 +118,23 @@ Link: [Wattio SmartHome](https://wattio.com/)
 
 Add the following to your `configuration.yaml`.
 
+> From version 0.2.0 the way of Wattio component is configured has been changed. If you are upgrading for a previous version you **MUST CHANGE YOUR CONFIG FILE**
+
 ```yaml
-# Wattio Sensors
-sensor:
-  - platform: wattio
-    scan_interval: 300
-
-# Wattio Pods
-switch:
-  - platform: wattio
-    scan_interval: 300
-
-# Wattio Doors
-binary_sensor:
-  - platform: wattio
-    scan_interval: 300
+# Wattio Platform
+wattio:
+    scan_interval: 60
+    therm_max_temp: 30
+    therm_min_temp: 10 
 ```
 
 Vars:
+
+Var | Description
+*scan_interval* | OPTIONAL - Time (in seconds) between data updates , defaults to 30 seconds.
+*therm_max_temp* | OPTIONAL - Max configurable temp for thermic devices, defaults to 30 degrees.
+*therm_min_temp* | OPTIONAL - Min configurable temp for thermic devices, defaults to 10 degrees.
+
  - scan_interval: Time to refresh data and between requests to Wattio API.
 
 ### Adittional steps
@@ -149,6 +148,7 @@ Vars:
  - After changing the configuration file, another notification should appear asking the user to authorize home assistant at wattio.
  - Follow the link for authorization, a page requesting username and password from Wattio should be shown.
  - Finally, close the notification and refresh your GUI.
+ - Once devices has been added to HASS, first data update will take place after the configured scan_interval.
 
 
 <p align="center">

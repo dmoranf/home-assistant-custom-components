@@ -76,6 +76,7 @@ class WattioThermic(WattioDevice, ClimateDevice):
         self._channel = None
         self._min_temp = min_temp
         self._max_temp = max_temp
+        self._available = 0
 
     @property
     def name(self):
@@ -160,26 +161,23 @@ class WattioThermic(WattioDevice, ClimateDevice):
     @property
     def available(self):
         """Return availability."""
-        if self._data is not None:
-            status = 0
-            for device in self._data:
-                if device["ieee"] == self._ieee:
-                    status = 1
-                    break
-            if status == 1:
-                _LOGGER.debug("Device %s - available", self._name)
-                return STATE_OK
-            else:
-                _LOGGER.debug("Device %s - NOT available", self._name)
-                return STATE_UNAVAILABLE
+        if self._available == 1:
+            _LOGGER.debug("Device %s - available", self._name)
+            return STATE_OK
+        else:
+            _LOGGER.debug("Device %s - NOT available", self._name)
+            return STATE_UNAVAILABLE
+
 
     async def async_update(self):
         """Update sensor data."""
         self._data = self.hass.data[DOMAIN]["data"]
-        _LOGGER.error("ACTUALIZANDO CLIMATE %s - %s", self._name, self._ieee)
+        _LOGGER.debug("ACTUALIZANDO CLIMATE %s - %s", self._name, self._ieee)
         if self._data is not None:
+            self._available = 0
             for device in self._data:
                 if device["ieee"] == self._ieee:
+                    self._available = 1
                     _LOGGER.debug(device["status"])
                     tempvalue = device["status"]
                     self._current_temperature = tempvalue["current"]

@@ -53,22 +53,17 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
         self._battery = None
         self._data = None
         self._channel = None
+        self._available = 0
 
     @property
     def available(self):
         """Return availability."""
-        if self._data is not None:
-            status = 0
-            for device in self._data:
-                if device["ieee"] == self._ieee:
-                    status = 1
-                    break
-            if status == 1:
-                _LOGGER.debug("Device %s - available", self._name)
-                return STATE_OK
-            else:
-                _LOGGER.debug("Device %s - NOT available", self._name)
-                return STATE_UNAVAILABLE
+        if self._available == 1:
+            _LOGGER.debug("Device %s - available", self._name)
+            return STATE_OK
+        else:
+            _LOGGER.debug("Device %s - NOT available", self._name)
+            return STATE_UNAVAILABLE
 
     @property
     def should_poll(self):
@@ -108,10 +103,12 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
         """Update sensor data."""
         # Parece que no tira con las CONST devolver 0 o 1
         self._data = self.hass.data[DOMAIN]["data"]
-        _LOGGER.error("ACTUALIZANDO SENSOR BINARIO %s - %s", self._name, self._ieee)
+        _LOGGER.debug("ACTUALIZANDO SENSOR BINARIO %s - %s", self._name, self._ieee)
         if self._data is not None:
+            self._available = 0
             for device in self._data:
                 if device["ieee"] == self._ieee:
+                    self._available = 1
                     self._battery = device["status"]["battery"]
                     if device["type"] == "motion":
                         _LOGGER.debug(device["status"]["presence"])
@@ -120,7 +117,6 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
                         self._state = device["status"]["opened"]
                         _LOGGER.debug(device["status"]["opened"])
                     break
-        # testvalue = self._wattiodata.update_data(hass, self._name, self._devtype, self._ieee)
             _LOGGER.debug(self._state)
             return self._state
         else:

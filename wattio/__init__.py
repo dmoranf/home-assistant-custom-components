@@ -372,7 +372,7 @@ class wattioAPI:
         try:
             uri = WATTIO_POD_URI.format(str(ieee), str(status))
             api_call_response = requests.put(uri, headers=api_call_headers, verify=False)
-            _LOGGER.error(api_call_response.text)
+            _LOGGER.debug(api_call_response.text)
             if status == "on":
                 return 1
             else:
@@ -383,13 +383,12 @@ class wattioAPI:
 
     def set_thermic_temp(self, ieee, temp):
         """Change thermic target temp."""
-        _LOGGER.error("Updated request for %s - %s", str(ieee), str(temp))
-        _LOGGER.error("Peticion API")
+        _LOGGER.debug("Updated request for %s - %s", str(ieee), str(temp))
         api_call_headers = {'Authorization': 'Bearer ' + self._token}
         try:
             uri = WATTIO_THERMIC_TEMP_URI.format(str(ieee), str(temp))
             api_call_response = requests.put(uri, headers=api_call_headers, verify=False)
-            _LOGGER.error(api_call_response.text)
+            _LOGGER.debug(api_call_response.text)
             return 1
         except requests.exceptions.RequestException as err:
             _LOGGER.error("Couldn't change device status data from Wattio API")
@@ -398,13 +397,12 @@ class wattioAPI:
 
     def set_thermic_mode(self, ieee, status):
         """Change thermic working mode."""
-        _LOGGER.error("Updated request for %s - %s", str(ieee), str(status))
-        _LOGGER.error("Peticion API")
+        _LOGGER.debug("Updated request for %s - %s", str(ieee), str(status))
         api_call_headers = {'Authorization': 'Bearer ' + self._token}
         try:
             uri = WATTIO_THERMIC_MODE_URI.format(str(ieee), str(status))
             api_call_response = requests.put(uri, headers=api_call_headers, verify=False)
-            _LOGGER.error(api_call_response.text)
+            _LOGGER.debug(api_call_response.text)
             return 1
         except requests.exceptions.RequestException as err:
             _LOGGER.error("Couldn't change device status data from Wattio API")

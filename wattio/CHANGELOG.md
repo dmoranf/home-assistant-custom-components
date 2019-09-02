@@ -2,12 +2,17 @@
 Under development !!
 
 ## [0.2.0]
-- Testing support for Wattio Thermic 
-- Code changed to platform and async methods, only one API request for all devices
+### Added
+- Support for Wattio Thermic. Need extra testing on winter time ;)
+- Battery status for supported devices
+
+### Changed
+- Full Code changed to platform and async methods, only one API request for all devices
+- Pod device changed from Light to Switch. Support for power consumption at entity
 - Code cleanup and optimization
 
 ### IMPORTANT UPGRADE INFO 
-No need to change wattio.conf or re-authorize the app, but the way the platform is configured is CHANGED:
+No need to change wattio.conf or re-authorize the app, but **the way the platform is configured HAS CHANGED**.
 
 New configuration.yaml example:
 

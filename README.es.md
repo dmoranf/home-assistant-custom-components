@@ -31,7 +31,7 @@ No obstante desde la API dicho valor **no se devuelve**, y se obtiene un LAST_SE
 
 ### Requisitos
 
- - Testeado en FortiOS 6.0.4 y Home Assistant 0.90.2
+ - Testeado en FortiOS 6.0.4 y Home Assistant >= 0.90.2 (Testeado con 0.98.2)
  - Descubrimiento de dispositivos habilitado en el Fortigate a nivel de Interface.
 
 ### Instalación
@@ -72,7 +72,7 @@ Variables:
  - [FortiOS Tracker](https://community.home-assistant.io/t/fortios-device-tracker/28333/4) de [Mister_Slowhand](https://community.home-assistant.io/u/Mister_Slowhand): FortiOS Device Tracker mediante tabla ARP y SSH
 
 ### Wattio Smart Home
-<img src="https://img.shields.io/badge/Version-0.1.2-green.svg" />
+<img src="https://img.shields.io/badge/Version-0.2.0-green.svg" />
 
 Integración de la plataforma Wattio Smart Home en Home Assistant a través de API. Este componente está en desarrollo, por favor, consulta el [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) para ver los últimos cambios.
 
@@ -98,9 +98,9 @@ Link: [Wattio SmartHome](https://wattio.com)
 ### Requisitos
 
  - Client ID y Secret para usar la API de Wattio  (Solicitar a soporte de Wattio)
- - Testeado en Home Assistant 0.90.2
+ - Home Assistant >= 0.90.2 (Testeado con 0.98.2)
 
-### Installación
+### Instalación
 
 - Copia la carpeta "wattio" al directorio `<config dir>/custom_components/wattio`.
 - Configurar como se muestra más abajo.
@@ -111,25 +111,21 @@ Link: [Wattio SmartHome](https://wattio.com)
 
 Añade la siguiente configuración al fichero `configuration.yaml`.
 
+> Desde la versión 0.2.0 se ha cambiado la implementación del componente. Si estás actualizando desde una versión anterior **es NECESARIO CAMBIAR LA CONFIGURACION del fichero **
+
 ```yaml
-# Wattio Sensors
-sensor:
-  - platform: wattio
-    scan_interval: 300
-
-# Wattio Pods
-switch:
-  - platform: wattio
-    scan_interval: 300
-
-# Wattio Doors
-binary_sensor:
-  - platform: wattio
-    scan_interval: 300
+# Configuración plataforma WATTIO
+wattio:
+    scan_interval: 60
+    therm_max_temp: 30
+    therm_min_temp: 10 
 ```
+Variables:
 
-Vars:
- - scan_interval: Intervalo de recolección de datos (y entre peticiones a la API)
+Variable | Descripción
+*scan_interval* | OPCIONAL - Intervalo de recolección de datos en segundos , por defecto 30 segundos.
+*therm_max_temp* | OPCIONAL - Temperatura máxima configurable para el thermic, por defecto 30 grados
+*therm_min_temp* | OPCIONAL - Temperatura mínima configurable para el thermic, por defecto 10 grados
 
 ### Pasos adicionales
 
@@ -141,7 +137,8 @@ Vars:
 
  - Una vez configurado, aparecerá una nueva notificación solicitando autorizar la aplicación en Wattio.
  - Seguir los enlaces, se redirigirá a una página de Wattio en la que solicitará usuario y contraseña. 
- - Finalmente, cerrar la notificación (Finalizar) y refrescar el GUI para ver los nuevos sensores Finally.
+ - Finalmente, cerrar la notificación (Finalizar) y refrescar el GUI para ver los nuevos sensores.
+ - Una vez añadidos los sensores, estos comenzarán a obtener datos según el intervalo configurado.
 
 
 <p align="center">

@@ -1,7 +1,7 @@
 """Platform for Wattio integration testing."""
 import logging
 
-from homeassistant.components.light import Light
+from homeassistant.components.switch import SwitchDevice
 from homeassistant.const import STATE_OK, STATE_ON, STATE_UNAVAILABLE
 
 from . import DOMAIN, WattioDevice, wattioAPI
@@ -30,7 +30,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities(devices)
 
 
-class WattioSwitch(WattioDevice, Light):
+class WattioSwitch(WattioDevice, SwitchDevice):
     """Representation of Sensor."""
 
     def __init__(self, name, devtype, icon, ieee):
@@ -45,6 +45,7 @@ class WattioSwitch(WattioDevice, Light):
         self._devtype = devtype
         self._current_consumption = None
         self._channel = None
+        self._available = 0
 
     @property
     def is_on(self):
@@ -70,6 +71,11 @@ class WattioSwitch(WattioDevice, Light):
         # return self._apidata.set_switch_status(self._ieee, "off", self.hass.[DOMAIN]["token"])
 
     @property
+    def current_power_w(self):
+        return self._current_consumption
+
+
+    @property
     def should_poll(self):
         """No polling needed."""
         return False
@@ -82,33 +88,28 @@ class WattioSwitch(WattioDevice, Light):
     @property
     def available(self):
         """Return availability."""
-        if self._data is not None:
-            status = 0
-            for device in self._data:
-                if device["ieee"] == self._ieee:
-                    status = 1
-                    break
-            if status == 1:
-                _LOGGER.debug("Device %s - available", self._name)
-                return STATE_OK
-            else:
-                _LOGGER.debug("Device %s - NOT available", self._name)
-                return STATE_UNAVAILABLE
+        if self._available == 1:
+            _LOGGER.debug("Device %s - available", self._name)
+            return STATE_OK
+        else:
+            _LOGGER.debug("Device %s - NOT available", self._name)
+            return STATE_UNAVAILABLE
 
     async def async_update(self):
         """Return sensor state."""
         self._data = self.hass.data[DOMAIN]["data"]
-        _LOGGER.error("ACTUALIZANDO SWITCH %s - %s", self._name, self._ieee)
+        _LOGGER.debug("ACTUALIZANDO SWITCH %s - %s", self._name, self._ieee)
         if self._data is not None:
+            self._available = 0
             for device in self._data:
                 if device["ieee"] == self._ieee:
-                    _LOGGER.debug(device["status"]["state"])
+                    self._available = 1
+                    self._current_consumption = device["status"]["consumption"]
                     if device["status"]["state"] == 1:
                         self._state = STATE_ON
                     else:
                         self._state = False
                     break
-        # testvalue = self._wattiodata.update_data(hass, self._name, self._devtype, self._ieee)
             _LOGGER.debug(self._state)
             return self._state
         else:

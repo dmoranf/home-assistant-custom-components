@@ -76,6 +76,7 @@ class WattioSensor(WattioDevice, Entity):
         self._channel = None
         self._battery = None
         self._data = None
+        self._available = 0
         if channel is not None:
             self._channel = channel-1
 
@@ -87,21 +88,12 @@ class WattioSensor(WattioDevice, Entity):
     @property
     def available(self):
         """Return availability."""
-        if self._data is not None:
-            status = 0
-            for device in self._data:
-                if self._channel is not None and device["ieee"] == self._ieee:
-                    status = 1
-                    break
-                elif device["ieee"] == self._ieee:
-                    status = 1
-                    break
-            if status == 1:
-                _LOGGER.debug("Device %s - available", self._name)
-                return STATE_OK
-            else:
-                _LOGGER.debug("Device %s - NOT available", self._name)
-                return STATE_UNAVAILABLE
+        if self._available == 1:
+            _LOGGER.debug("Device %s - available", self._name)
+            return STATE_OK
+        else:
+            _LOGGER.debug("Device %s - NOT available", self._name)
+            return STATE_UNAVAILABLE
 
     @property
     def should_poll(self):
@@ -142,8 +134,10 @@ class WattioSensor(WattioDevice, Entity):
         self._data = self.hass.data[DOMAIN]["data"]
         _LOGGER.error("ACTUALIZANDO SENSOR %s - %s", self._name, self._ieee)
         if self._data is not None:
+            self._available = 0
             for device in self._data:
                 if device["ieee"] == self._ieee:
+                    self._available = 1
                     if self._channel is not None and self._devtype == "bat":
                         sensorvalue = device["status"]["consumption"][self._channel]
                     elif self._devtype == "therm":
@@ -161,21 +155,3 @@ class WattioSensor(WattioDevice, Entity):
             return self._state
         else:
             return False
-
-        '''
-        if sensordata == 0:
-            return None
-        if self._channel is not None and self._devtype == "bat":
-            sensorvalue = sensordata["consumption"][self._channel]
-        elif self._devtype == "therm":
-            sensorvalue = sensordata["current"]
-        elif self._devtype == "motion":
-            sensorvalue = sensordata["temperature"]
-            self._battery = sensordata["battery"]
-        elif self._devtype == "pod":
-            sensorvalue = sensordata["consumption"]
-        else:
-            sensorvalue = sensordata
-        '''
-        _LOGGER.debug("Updating sensor %s: %s", self._name, sensorvalue)
-        self._state = 0
