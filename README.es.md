@@ -122,10 +122,11 @@ wattio:
 ```
 Variables:
 
-Variable | Descripción
-*scan_interval* | OPCIONAL - Intervalo de recolección de datos en segundos , por defecto 30 segundos.
-*therm_max_temp* | OPCIONAL - Temperatura máxima configurable para el thermic, por defecto 30 grados
-*therm_min_temp* | OPCIONAL - Temperatura mínima configurable para el thermic, por defecto 10 grados
+| Variable | Descripción |
+| --- | --- |
+| *scan_interval* | OPCIONAL - Intervalo de recolección de datos en segundos , por defecto 30 segundos |
+| *therm_max_temp* | OPCIONAL - Temperatura máxima configurable para el thermic, por defecto 30 grados |
+| *therm_min_temp* | OPCIONAL - Temperatura mínima configurable para el thermic, por defecto 10 grados |
 
 ### Pasos adicionales
 

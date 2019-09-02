@@ -130,10 +130,11 @@ wattio:
 
 Vars:
 
-Var | Description
-*scan_interval* | OPTIONAL - Time (in seconds) between data updates , defaults to 30 seconds.
-*therm_max_temp* | OPTIONAL - Max configurable temp for thermic devices, defaults to 30 degrees.
-*therm_min_temp* | OPTIONAL - Min configurable temp for thermic devices, defaults to 10 degrees.
+| Var | Description |
+| --- | --- |
+| *scan_interval* | OPTIONAL - Time (in seconds) between data updates , defaults to 30 seconds |
+| *therm_max_temp* | OPTIONAL - Max configurable temp for thermic devices, defaults to 30 degrees |
+| *therm_min_temp* | OPTIONAL - Min configurable temp for thermic devices, defaults to 10 degrees |
 
  - scan_interval: Time to refresh data and between requests to Wattio API.
 
