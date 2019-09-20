@@ -20,7 +20,7 @@ from homeassistant.helpers.event import track_time_interval
 from homeassistant.util.json import load_json, save_json
 
 # Component Version
-__version__ = '0.2.0'
+__version__ = '0.2.2'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -134,12 +134,14 @@ def setup(hass, config):
     else:
         # Not Authorized, need to complete OAUTH2 process
         auth_uri = get_auth_uri(hass, config_file.get("client_id"))
+        start_uri = '{}{}'.format(hass.config.api.base_url, WATTIO_AUTH_START)
         _LOGGER.error("No token configured, complete OAUTH2 authorization: %s", auth_uri)
         hass.http.register_view(WattioRegisterView(hass,
                                                    config,
                                                    config_file.get("client_id"),
                                                    config_file.get("client_secret"),
-                                                   auth_uri
+                                                   auth_uri,
+                                                   start_uri
                                                    ))
         request_oauth_completion(hass, config, auth_uri, setup)
         return True
@@ -240,13 +242,15 @@ class WattioRegisterView(HomeAssistantView):
     requires_auth = False
     name = "api:wattio"
 
-    def __init__(self, hass, config, client_id, client_secret, auth_uri):
+    def __init__(self, hass, config, client_id, client_secret, auth_uri, start_uri):
         """Init Wattio view for OAUTH registration."""
         self.config = config
         self.client_id = client_id
         self.client_secret = client_secret
         self.auth_uri = auth_uri
+        self.start_uri = start_uri
         self.hass = hass
+
 
     @callback
     def get(self, request):
@@ -265,7 +269,7 @@ class WattioRegisterView(HomeAssistantView):
             return web.Response(text=text, content_type='text/html')
         else:
             api = wattioAPI()
-            token = api.get_token(str(data.get('code')), str(self.client_id), str(self.client_secret))
+            token = api.get_token(str(data.get('code')), str(self.client_id), str(self.client_secret),str(self.start_uri))
             if token:
                 config_contents = {ATTR_ACCESS_TOKEN: token,
                                    ATTR_CLIENT_ID: self.client_id,
@@ -279,7 +283,8 @@ class WattioRegisterView(HomeAssistantView):
                 except:
                     _LOGGER.error("Error guardando TOKEN %s ", sys.exc_info()[0])
                     return web.Response(text="No se ha podido almacenar TOKEN revisar permisos")
-
+            else:
+                    return web.Response(text="Algo fue un poco mal :/")
 
 class WattioDevice(Entity):
     """Wattio Device Common Object."""
@@ -311,13 +316,13 @@ class wattioAPI:
         self._data = None
         self._token = token
 
-    def get_token(self, code, client_id, client_secret):
+    def get_token(self, code, client_id, client_secret,redirect_uri):
         """Get Token from Wattio API, requieres Auth Code, Client ID and Secret."""
         data = {'code': code,
                 'client_id': client_id,
                 'client_secret': client_secret,
                 'grant_type': 'authorization_code',
-                'redirect_uri': 'http://192.168.0.250:8123'+WATTIO_AUTH_START
+                'redirect_uri': redirect_uri
                 }
         try:
             access_token_response = requests.post(WATTIO_TOKEN_URI, data=data, verify=False, allow_redirects=False)
