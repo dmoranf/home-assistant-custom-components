@@ -4,7 +4,7 @@ import logging
 from homeassistant.components.switch import SwitchDevice
 from homeassistant.const import STATE_OK, STATE_ON, STATE_UNAVAILABLE
 
-from . import DOMAIN, WattioDevice, wattioAPI
+from . import DOMAIN, WattioDevice, wattioAPI, WATTIO_SWITCHES
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,8 +19,13 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     devices = []
     # Create Updater Object
     for device in hass.data[DOMAIN]["devices"]:
-        icon = None
-        if device["type"] == "pod":
+        if device["type"] == "door" or device["type"] == "motion":
+            icon = "mdi:security"
+        elif device["type"] == "siren":
+            icon = "mdi:alert"
+        else:
+            icon = None
+        if device["type"] in WATTIO_SWITCHES:
             devices.append(WattioSwitch(device["name"],
                                         device["type"],
                                         icon,
@@ -56,7 +61,10 @@ class WattioSwitch(WattioDevice, SwitchDevice):
         """Turn On method."""
         wattio = wattioAPI(self.hass.data[DOMAIN]["token"])
         _LOGGER.error("Encendiendo")
-        wattio.set_switch_status(self._ieee, "on")
+        if self._devtype == "siren":
+            wattio.set_switch_status(self._ieee, "on", 'siren')
+        else:
+            wattio.set_switch_status(self._ieee, "on")
         self._state = STATE_ON
         return
         # return self._apidata.set_switch_status(self._ieee, "on", self.hass.[DOMAIN]["token"])
@@ -65,14 +73,18 @@ class WattioSwitch(WattioDevice, SwitchDevice):
         """Turn Off method."""
         wattio = wattioAPI(self.hass.data[DOMAIN]["token"])
         _LOGGER.error("Apagando")
-        wattio.set_switch_status(self._ieee, "off")
+        if self._devtype == "siren":
+            wattio.set_switch_status(self._ieee, "off", 'siren')
+        else:
+            wattio.set_switch_status(self._ieee, "off")
         self._state = False
         return
         # return self._apidata.set_switch_status(self._ieee, "off", self.hass.[DOMAIN]["token"])
 
     @property
     def current_power_w(self):
-        return self._current_consumption
+        if self._devtype == "pod":
+            return self._current_consumption
 
 
     @property
@@ -84,6 +96,11 @@ class WattioSwitch(WattioDevice, SwitchDevice):
     def name(self):
         """Return the name of the sensor."""
         return self._name
+
+    @property
+    def icon(self):
+        """Return the image of the sensor."""
+        return self._icon
 
     @property
     def available(self):
@@ -104,11 +121,17 @@ class WattioSwitch(WattioDevice, SwitchDevice):
             for device in self._data:
                 if device["ieee"] == self._ieee:
                     self._available = 1
-                    self._current_consumption = device["status"]["consumption"]
-                    if device["status"]["state"] == 1:
-                        self._state = STATE_ON
-                    else:
-                        self._state = False
+                    if self._devtype == "pod":
+                        self._current_consumption = device["status"]["consumption"]
+                        if device["status"]["state"] == 1:
+                            self._state = STATE_ON
+                        else:
+                            self._state = False
+                    elif self._devtype == "siren":
+                        if device["status"]["state"] == 1:
+                            self._state = STATE_ON
+                        else:
+                            self._state = False
                     break
             _LOGGER.debug(self._state)
             return self._state

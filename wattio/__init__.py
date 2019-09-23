@@ -20,7 +20,7 @@ from homeassistant.helpers.event import track_time_interval
 from homeassistant.util.json import load_json, save_json
 
 # Component Version
-__version__ = '0.2.2'
+__version__ = '0.2.3'
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ WATTIO_STATUS_URI = 'https://api.wattio.com/public/v1/appliances/status'
 WATTIO_DEVICES_URI = 'https://api.wattio.com/public/v1/appliances'
 WATTIO_TOKEN_URI = 'https://api.wattio.com/public/oauth2/token'
 WATTIO_POD_URI = 'https://api.wattio.com/public/v1/appliances/pod/{}/{}'
+WATTIO_SIREN_URI = 'https://api.wattio.com/public/v1/appliances/siren/{}}/{}'
 WATTIO_THERMIC_MODE_URI = 'https://api.wattio.com/public/v1/appliances/therm/{}/mode/{}'
 WATTIO_THERMIC_TEMP_URI = 'https://api.wattio.com/public/v1/appliances/therm/{}/target/{}'
 WATTIO_AUTH_URI = 'https://api.wattio.com/public/oauth2/authorize'
@@ -41,6 +42,8 @@ WATTIO_AUTH_START = '/api/wattio'
 WATTIO_AUTH_CALLBACK_PATH = '/api/wattio/callback'
 WATTIO_CONF_FILE = 'wattio.conf'
 WATTIO_CACHE_FILE = '/tmp/wattio_cache.json'
+
+WATTIO_SWITCHES = ('pod' , 'siren', 'door', 'motion')
 
 DEFAULT_CONFIG = {
     'client_id': 'CLIENT_ID_HERE',
@@ -62,40 +65,44 @@ def setup(hass, config):
         # prueba
         data = apidata.update_wattio_data()
         _LOGGER.debug("API response data: %s", data)
-        json_data = json.loads(data)
-        hass.data[DOMAIN]['data'] = json_data
-        for device in json_data:
-            # Channel required for BATs
-            if device["type"] == "bat":
-                channelid = 0
-                for channel in device["status"]["consumption"]:
-                    id = "s_"+device["ieee"]+"_"+str(channelid)
+        if data is not None:
+            json_data = json.loads(data)
+            hass.data[DOMAIN]['data'] = json_data
+            for device in json_data:
+                # Channel required for BATs
+                if device["type"] == "bat":
+                    channelid = 0
+                    for channel in device["status"]["consumption"]:
+                        id = "s_"+device["ieee"]+"_"+str(channelid)
+                        _LOGGER.debug("Updating callback %s", id)
+                        async_dispatcher_send(hass, DATA_UPDATED.format(id))
+                        channelid = channelid + 1
+                else:
+                    # Generate sensors for all devices
+                    id = "s_"+device["ieee"]
                     _LOGGER.debug("Updating callback %s", id)
                     async_dispatcher_send(hass, DATA_UPDATED.format(id))
-                    channelid = channelid + 1
-            else:
-                # Generate sensors for all devices
-                id = "s_"+device["ieee"]
-                _LOGGER.debug("Updating callback %s", id)
-                async_dispatcher_send(hass, DATA_UPDATED.format(id))
 
-            # Binary Sensors
-            if device["type"] == "door" or device["type"] == "motion":
-                id = "bs_"+device["ieee"]
-                _LOGGER.debug("Updating callback %s", id)
-                async_dispatcher_send(hass, DATA_UPDATED.format(id))
+                # Binary Sensors
+                if device["type"] == "door" or device["type"] == "motion" or device["type"] == "siren":
+                    id = "bs_"+device["ieee"]
+                    _LOGGER.debug("Updating callback %s", id)
+                    async_dispatcher_send(hass, DATA_UPDATED.format(id))
 
-            # Climate
-            if device["type"] == "therm":
-                id = "cli_"+device["ieee"]
-                _LOGGER.debug("Updating callback %s", id)
-                async_dispatcher_send(hass, DATA_UPDATED.format(id))
-            # Switches
-            if device["type"] == "pod":
-                id = "sw_"+device["ieee"]
-                _LOGGER.debug("Updating callback %s", id)
-                async_dispatcher_send(hass, DATA_UPDATED.format(id))
+                # Climate
+                if device["type"] == "therm":
+                    id = "cli_"+device["ieee"]
+                    _LOGGER.debug("Updating callback %s", id)
+                    async_dispatcher_send(hass, DATA_UPDATED.format(id))
 
+                # Switches
+                if device["type"] == "pod" or device["type"] == "siren":
+                    id = "sw_"+device["ieee"]
+                    _LOGGER.debug("Updating callback %s", id)
+                    async_dispatcher_send(hass, DATA_UPDATED.format(id))
+        else:
+            _LOGGER.error("Couldn't fetch data from WATTIO API, retrying on next scheduled update ...")  
+  
     config_path = hass.config.path(WATTIO_CONF_FILE)
     _LOGGER.debug("Wattio config file: %s", (config_path))
     config_status = check_config_file(config_path)
@@ -163,16 +170,6 @@ def request_app_setup(hass, config, config_path):
         else:
             configurator.request_done(CONFIGURING.pop('wattio'))
             setup(hass, config)
-        '''
-        config_status = check_config_file(hass.config.path(WATTIO_CONF_FILE))
-        if config_status == 2:
-            return False
-        elif config_status == 1:
-            configurator.notify_errors(CONFIGURING['wattio'], "test")
-            return False
-        else:
-            setup(hass, config)
-        '''
 
     description = 'Wattio SmartHome no configurado</span>.<br /><br /> - Solicita tu Client y Secret ID a soporte de Wattio.<br />- Edita manualmente el fichero wattio.conf<br />- Añade el Client y Secret al fichero<br /><br />- Una vez finalizado, pulsa Siguiente<br /><br />Si algo no va bien revisa los logs de HA :)<br />'
     submit = "Siguiente"
@@ -369,13 +366,17 @@ class wattioAPI:
             _LOGGER.error(err)
             return None
 
-    def set_switch_status(self, ieee, status):
+    def set_switch_status(self, ieee, status, type='pod'):
         """Change switch status on / off."""
-        _LOGGER.error("Status change for %s - %s", str(ieee), str(status))
-        _LOGGER.error("Peticion API")
+        if type == "pod":
+            wattio_uri = WATTIO_POD_URI
+        else:
+            wattio_uri = WATTIO_SIREN_URI
+        _LOGGER.debug("Status change for %s - %s", str(ieee), str(status))
+        _LOGGER.debug("Peticion API")
         api_call_headers = {'Authorization': 'Bearer ' + self._token}
         try:
-            uri = WATTIO_POD_URI.format(str(ieee), str(status))
+            uri = wattio_uri.format(str(ieee), str(status))
             api_call_response = requests.put(uri, headers=api_call_headers, verify=False)
             _LOGGER.debug(api_call_response.text)
             if status == "on":

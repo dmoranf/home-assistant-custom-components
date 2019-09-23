@@ -139,6 +139,7 @@ class WattioThermic(WattioDevice, ClimateDevice):
         _LOGGER.debug("Set target temperature to %s", temperature)
         wattio = wattioAPI(self.hass.data[DOMAIN]["token"])
         wattio.set_thermic_temp(self._ieee, temperature)
+        self._target_temperature = temperature
 
     async def async_set_hvac_mode(self, hvac_mode):
         """Set operation mode."""

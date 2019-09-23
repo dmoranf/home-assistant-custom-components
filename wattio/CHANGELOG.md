@@ -4,6 +4,16 @@ Under development !!
 ## TODO
 - Climate needs more testing !!!
 
+## [0.2.3] - Unreleased
+### Fixed
+- Excepcion when Wattio API responds with an error 500
+
+### Added
+- Siren binary sensor for Pre Alarm state
+- Siren switch sensor for making it sound or stop. (Panic button)
+- Some icons changed
+- Motion and Door security state support (In progess ...)
+
 ## [0.2.2] - 2019-09-20
 ### Fixed
 - #1 redirect_uri was hardcode on authorization process

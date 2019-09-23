@@ -35,6 +35,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                                               device["ieee"]
                                               ))
             _LOGGER.debug("Adding device: %s", device["name"])
+        if device["type"] == "siren":
+            icon = "mdi:alert"
+            devices.append(WattioBinarySensor(device["name"],
+                                              "siren",
+                                              icon,
+                                              device["ieee"]
+                                              ))
+            _LOGGER.debug("Adding device: %s", device["name"])
+
     async_add_entities(devices)
 
 
@@ -115,6 +124,9 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
                         self._state = device["status"]["presence"]
                     elif device["type"] == "door":
                         self._state = device["status"]["opened"]
+                        _LOGGER.debug(device["status"]["opened"])
+                    elif device["type"] == "siren":
+                        self._state = device["status"]["preAlarm"]
                         _LOGGER.debug(device["status"]["opened"])
                     break
             _LOGGER.debug(self._state)
