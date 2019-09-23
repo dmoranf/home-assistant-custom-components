@@ -4,6 +4,10 @@ Under development !!
 ## TODO
 - Climate needs more testing !!!
 
+## [0.2.2] - 2019-09-20
+### Fixed
+- #1 redirect_uri was hardcode on authorization process
+
 ## [0.2.1] - 2019-09-01
 ### Fixed
 - Climate implementantion on Hass >= 0.96 has changed and it's not backward compatible, new climate.py is compatible on HASS >= 0.96
