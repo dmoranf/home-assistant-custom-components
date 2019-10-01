@@ -5,10 +5,12 @@ Under development !!
 - Climate needs more testing !!!
 
 ## [0.2.3] - In progress ... JUST FOR TESTING PURPOSES !!!!!!!
-This is the current devel branch ... it does not WORK !!!
+This is the current devel branch ... Testing in progress !!!
 
 ### Fixed
 - Excepcion when Wattio API responds with an error 500
+- Device Availability broken in 0.2.2
+- Status update change not showing in interface in 0.2.2
 
 ### Added
 - Siren binary sensor for Pre Alarm state
@@ -18,7 +20,6 @@ This is the current devel branch ... it does not WORK !!!
 ### Changed
 - Some icons changed
 - Black code format
-- Thermic target temperature set after change
 
 ## [0.2.2] - 2019-09-20
 ### Fixed
