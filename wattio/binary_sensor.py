@@ -99,11 +99,12 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
             for device in self._data:
                 if device["ieee"] == self._ieee:
                     self._available = 1
-                    self._battery = device["status"]["battery"]
                     if device["type"] == "motion":
                         _LOGGER.debug(device["status"]["presence"])
+                        self._battery = device["status"]["battery"]
                         self._state = device["status"]["presence"]
                     elif device["type"] == "door":
+                        self._battery = device["status"]["battery"]
                         self._state = device["status"]["opened"]
                         _LOGGER.debug(device["status"]["opened"])
                     elif device["type"] == "siren":
