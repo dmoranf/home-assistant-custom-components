@@ -8,18 +8,18 @@ Under development !!
 This is the current devel branch ... Testing in progress !!!
 
 ### Fixed
-- Excepcion when Wattio API responds with an error 500
-- Device Availability broken in 0.2.2
-- Status update change not showing in interface in 0.2.2
+- Managed exception when Wattio API responds with an error 500
+- Device Availability was broken in 0.2.2
+- Status update change was not showing in interface in 0.2.2
 
 ### Added
 - Siren binary sensor for Pre Alarm state
 - Siren switch sensor for making it sound or stop. (Panic button)
-- Motion and Door security state support (In progess ...)
+- Motion and Door security state support. Enable with security: True in configuration.yaml
 
 ### Changed
 - Some icons changed
-- Black code format
+- Black code formatting
 
 ## [0.2.2] - 2019-09-20
 ### Fixed
