@@ -15,7 +15,17 @@ This is the current devel branch ... Testing in progress !!!
 ### Added
 - Siren binary sensor for Pre Alarm state
 - Siren switch sensor for making it sound or stop. (Panic button)
-- Motion and Door security state support. Enable with security: True in configuration.yaml
+- Motion and Door security state support. 
+
+Configuration.yaml example:
+
+```yaml
+wattio:
+  scan_interval: 60 (OPTIONAL: time in seconds, defaults to 30)
+  therm_max_temp: 30 (OPTIONAL: Max temp for climate component, defaults to 30)  
+  therm_min_temp: 10 (OPTIONAL: Min temp for climate component, defaults to 10)
+  security: True (OPTIONAL: Enable security switches, defaults to False)
+```
 
 ### Changed
 - Some icons changed
