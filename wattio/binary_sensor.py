@@ -108,7 +108,7 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
                         _LOGGER.debug(device["status"]["opened"])
                     elif device["type"] == "siren":
                         self._state = device["status"]["preAlarm"]
-                        _LOGGER.debug(device["status"]["opened"])
+                        _LOGGER.debug(device["status"]["preAlarm"])
                     break
             _LOGGER.debug(self._state)
             return self._state
