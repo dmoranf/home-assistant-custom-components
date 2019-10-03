@@ -1,5 +1,6 @@
 # Changelog
-Under development !!
+Under development !! 
+Join the conversation on: https://community.wattio.com/portal/community/topic/integrar-wattio-con-home-assistant
 
 ## TODO
 - Climate needs more testing !!!
