@@ -7,7 +7,7 @@ Join the conversation @ https://community.wattio.com/portal/community/topic/inte
 - Climate needs more testing !!!
 - Separate polling time for Security switches
 
-## [0.2.3] - 2019-02-10 ... JUST FOR TESTING PURPOSES !!!!!!!
+## [0.2.3] - 2019-10-02 
 This is the current devel branch ... Testing in progress !!!
 
 ### Fixed
