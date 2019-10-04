@@ -127,7 +127,7 @@ class WattioSwitch(WattioDevice, SwitchDevice):
                         else:
                             self._state = False
                     elif self._devtype == "siren":
-                        if device["status"]["alarm"] == 1:
+                        if device["status"]["alarm"] == 1 or device["status"]["preAlarm"] == 1:
                             self._state = STATE_ON
                         else:
                             self._state = False

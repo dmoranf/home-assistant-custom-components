@@ -54,5 +54,6 @@ ICON_SECURITY = "mdi:security"
 CONF_MAX_TEMP = "therm_max_temp"
 CONF_MIN_TEMP = "therm_min_temp"
 CONF_SECURITY = "security"
+CONF_SECURITY_INTERVAL ="security_interval"
 DEFAULT_MAX_TEMP = 30
 DEFAULT_MIN_TEMP = 10

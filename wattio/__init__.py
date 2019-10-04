@@ -30,6 +30,7 @@ from .const import (
     ATTR_CLIENT_SECRET,
     ATTR_LAST_SAVED_AT,
     CONF_SECURITY,
+    CONF_SECURITY_INTERVAL,
     DATA_UPDATED,
     DEFAULT_CONFIG,
     DOMAIN,
@@ -64,6 +65,7 @@ CONFIG_SCHEMA = vol.Schema(
     {
         DOMAIN: vol.Schema(
             {vol.Optional(CONF_SECURITY, default=False): cv.boolean},
+            {vol.Optional(CONF_SECURITY_INTERVAL, default=None): cv.positive_int},
             extra=vol.ALLOW_EXTRA,
         )
     },
@@ -75,10 +77,16 @@ def setup(hass, config):
     """Configure Wattio platform."""
     update_interval = config[DOMAIN].get(CONF_SCAN_INTERVAL)
     security_enabled = config[DOMAIN].get(CONF_SECURITY)
+    if config[DOMAIN].get(CONF_SECURITY_INTERVAL) is None:
+        security_interval = update_interval
+    else:
+        security_interval = config[DOMAIN].get(CONF_SECURITY_INTERVAL)
+
     _LOGGER.debug(
-        "=> Wattio platform v%s started | Update Interval %s seconds <=",
+        "=> Wattio platform v%s started | Update Interval %s seconds | Security Interval %s seconds <=",
         VERSION,
         update_interval,
+        security_interval,
     )
 
     def poll_wattio_security_update(event_time):
@@ -176,9 +184,9 @@ def setup(hass, config):
         track_time_interval(hass, poll_wattio_update, timedelta(seconds=update_interval))
 
         if security_enabled is True:
-            _LOGGER.error("Adding security callbacks")
+            _LOGGER.debug("Adding security callbacks")
             track_time_interval(
-                hass, poll_wattio_security_update, timedelta(seconds=update_interval)
+                hass, poll_wattio_security_update, timedelta(seconds=security_interval)
             )
         return True
     # Not Authorized, need to complete OAUTH2 process
