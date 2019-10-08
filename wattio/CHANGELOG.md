@@ -7,8 +7,6 @@ Join the conversation @ https://community.wattio.com/portal/community/topic/inte
 - Climate needs more testing !!!
 
 ## [0.2.3] - 2019-10-04 
-This is the current devel branch ... Testing in progress !!!
-
 ### Fixed
 - Managed exception when Wattio API responds with an error 500
 - Device Availability was broken in 0.2.2
