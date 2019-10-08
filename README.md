@@ -89,6 +89,17 @@ Link: [Wattio SmartHome](https://wattio.com/)
 
 Follow the conversation at: [Wattio Forum](https://community.wattio.com/portal/community/topic/integrar-wattio-con-home-assistant)
 
+### Supported devices
+
+This component currently supports:
+
+- Bat
+- Thermic
+- Motion
+- Door
+- Pod
+- Siren
+
 ### Important Info
 
 Since Hass 0.96, the way climate devices work has been changed and it is NOT backward compatible. Default (included) climate.py works for HASS versions >= 0.96, but a file called climate.py_pre_096 is available (but not mantained) for use if you are using HASS between 0.92 and 0.96. Just make a backup of climate.py and rename climate.py_pre_096 to climate.py
