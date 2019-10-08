@@ -83,6 +83,17 @@ Link: [Wattio SmartHome](https://wattio.com)
 
 Más información: [Foro](https://community.wattio.com/portal/community/topic/integrar-wattio-con-home-assistant)
 
+### Dispositivos soportados
+
+Este componente actualmente soporta los siguientes dispositivos:
+
+- BAT
+- Pod
+- Thermic
+- Motion
+- Door
+- Siren
+
 ### Información importante
 
 Desde la versión 0.96 ha cambiado la implementacion de los termostatos y no es compatible con versiones anteriores, la versión por defecto es compatible con >= 0.96, pero se incluye un fichero climate.py.pre_096 (no mantenido) que sería compatible con las versiones 0.92 a 0.96. En caso de necesitar usarlo, haz copia de climate.py y renombra cliamte.py_pre_096 a climate.py.
