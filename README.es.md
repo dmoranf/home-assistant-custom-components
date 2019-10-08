@@ -74,16 +74,18 @@ Variables:
 
  - [FortiOS Tracker](https://community.home-assistant.io/t/fortios-device-tracker/28333/4) de [Mister_Slowhand](https://community.home-assistant.io/u/Mister_Slowhand): FortiOS Device Tracker mediante tabla ARP y SSH
 
-### Wattio Smart Home
-<img src="https://img.shields.io/badge/Version-0.2.1-green.svg" />
+## Wattio Smart Home
+<img src="https://img.shields.io/badge/Version-0.2.3-green.svg" />
 
 Integración de la plataforma Wattio Smart Home en Home Assistant a través de API. Este componente está en desarrollo, por favor, consulta el [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) para ver los últimos cambios.
 
 Link: [Wattio SmartHome](https://wattio.com)
 
+Más información: [Foro](https://community.wattio.com/portal/community/topic/integrar-wattio-con-home-assistant)
+
 ### Información importante
 
-Desde la versión 0.96 ha cambiado la implementacion de los termostatos y no es compatible con versiones anteriores, la versión por defecto es compatible con >= 0.96, pero se incluye un fichero climate.py.pre_096 que sería compatible con las versiones 0.92 a 0.96. En caso de necesitar usarlo, haz copia de climate.py y renombra cliamte.py_pre_096 a climate.py.
+Desde la versión 0.96 ha cambiado la implementacion de los termostatos y no es compatible con versiones anteriores, la versión por defecto es compatible con >= 0.96, pero se incluye un fichero climate.py.pre_096 (no mantenido) que sería compatible con las versiones 0.92 a 0.96. En caso de necesitar usarlo, haz copia de climate.py y renombra cliamte.py_pre_096 a climate.py.
 
 ### Capturas de Pantalla
 
@@ -126,6 +128,8 @@ wattio:
     scan_interval: 60
     therm_max_temp: 30
     therm_min_temp: 10 
+    security: true
+    security_interval: 300
 ```
 Variables:
 
@@ -134,6 +138,9 @@ Variables:
 | *scan_interval* | OPCIONAL - Intervalo de recolección de datos en segundos , por defecto 30 segundos |
 | *therm_max_temp* | OPCIONAL - Temperatura máxima configurable para el thermic, por defecto 30 grados |
 | *therm_min_temp* | OPCIONAL - Temperatura mínima configurable para el thermic, por defecto 10 grados |
+| *security* | OPCIONAL - Habilitar los dispositivos de seguridad, por defecto false |
+| *security_interval* | OPCIONAL - Intervalo de recolección de datos en segundos, por defecto scan_interval |
+
 
 ### Pasos adicionales
 
