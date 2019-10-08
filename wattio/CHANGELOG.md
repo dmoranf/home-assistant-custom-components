@@ -1,8 +1,40 @@
 # Changelog
-Under development !!
+Under development !! 
+
+Join the conversation @ https://community.wattio.com/portal/community/topic/integrar-wattio-con-home-assistant
 
 ## TODO
 - Climate needs more testing !!!
+
+## [0.2.3] - 2019-10-04 
+This is the current devel branch ... Testing in progress !!!
+
+### Fixed
+- Managed exception when Wattio API responds with an error 500
+- Device Availability was broken in 0.2.2
+- Status update change was not showing in interface in 0.2.2
+- Siren switch status on preAlarm
+
+### Added
+- Siren binary sensor for Pre Alarm state
+- Siren switch sensor for making it sound or stop. (Panic button)
+- Motion and Door security state support.
+- Security separate poll interval 
+
+Configuration.yaml example:
+
+```yaml
+wattio:
+  scan_interval: 60 (OPTIONAL: time in seconds, defaults to 30)
+  therm_max_temp: 30 (OPTIONAL: Max temp for climate component, defaults to 30)  
+  therm_min_temp: 10 (OPTIONAL: Min temp for climate component, defaults to 10)
+  security: True (OPTIONAL: Enable security switches, defaults to False)
+  security_interval: 60 (OPTIONAL: time in seconds, defaults to scan_interval)
+```
+
+### Changed
+- Some icons changed
+- Black code formatting
 
 ## [0.2.2] - 2019-09-20
 ### Fixed

@@ -2,9 +2,11 @@
 import logging
 
 from homeassistant.components.binary_sensor import BinarySensorDevice
-from homeassistant.const import ATTR_BATTERY_LEVEL, STATE_OK, STATE_UNAVAILABLE
+from homeassistant.const import ATTR_BATTERY_LEVEL
 
-from . import DOMAIN, WattioDevice
+from . import WattioDevice
+
+from .const import BINARY_SENSORS, DOMAIN, ICON
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -19,27 +21,19 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     devices = []
     for device in hass.data[DOMAIN]["devices"]:
         icon = None
-        if device["type"] == "door":
-            icon = "mdi:door"
-            devices.append(WattioBinarySensor(device["name"],
-                                              device["type"],
-                                              icon,
-                                              device["ieee"]
-                                              ))
+        if device["type"] in BINARY_SENSORS:
+            icon = ICON[device["type"]]
+            devices.append(
+                WattioBinarySensor(device["name"], device["type"], icon, device["ieee"])
+            )
             _LOGGER.debug("Adding device: %s", device["name"])
-        if device["type"] == "motion":
-            icon = "mdi:adjust"
-            devices.append(WattioBinarySensor(device["name"],
-                                              "motion",
-                                              icon,
-                                              device["ieee"]
-                                              ))
-            _LOGGER.debug("Adding device: %s", device["name"])
+
     async_add_entities(devices)
 
 
 class WattioBinarySensor(WattioDevice, BinarySensorDevice):
     """Representation of Sensor."""
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, name, devtype, icon, ieee):
         """Initialize the sensor."""
@@ -52,18 +46,13 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
         self._devtype = devtype
         self._battery = None
         self._data = None
-        self._channel = None
         self._available = 0
 
     @property
     def available(self):
         """Return availability."""
-        if self._available == 1:
-            _LOGGER.debug("Device %s - available", self._name)
-            return STATE_OK
-        else:
-            _LOGGER.debug("Device %s - NOT available", self._name)
-            return STATE_UNAVAILABLE
+        _LOGGER.debug("Device %s - availability: %s", self._name, self._available)
+        return True if self._available == 1 else False
 
     @property
     def should_poll(self):
@@ -96,8 +85,9 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
     def get_battery_level(self):
         """Return device battery level."""
         if self._battery is not None:
-            battery_level = round((self._battery*100)/4)
+            battery_level = round((self._battery * 100) / 4)
             return battery_level
+        return False
 
     async def async_update(self):
         """Update sensor data."""
@@ -109,15 +99,18 @@ class WattioBinarySensor(WattioDevice, BinarySensorDevice):
             for device in self._data:
                 if device["ieee"] == self._ieee:
                     self._available = 1
-                    self._battery = device["status"]["battery"]
                     if device["type"] == "motion":
                         _LOGGER.debug(device["status"]["presence"])
+                        self._battery = device["status"]["battery"]
                         self._state = device["status"]["presence"]
                     elif device["type"] == "door":
+                        self._battery = device["status"]["battery"]
                         self._state = device["status"]["opened"]
                         _LOGGER.debug(device["status"]["opened"])
+                    elif device["type"] == "siren":
+                        self._state = device["status"]["preAlarm"]
+                        _LOGGER.debug(device["status"]["preAlarm"])
                     break
             _LOGGER.debug(self._state)
             return self._state
-        else:
-            return False
+        return False

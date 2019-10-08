@@ -1,11 +1,14 @@
 """Platform for Wattio integration testing."""
 import logging
 
-from homeassistant.const import (ATTR_BATTERY_LEVEL, STATE_OK,
-                                 STATE_UNAVAILABLE, TEMP_CELSIUS)
+from homeassistant.const import (
+    ATTR_BATTERY_LEVEL
+)
 from homeassistant.helpers.entity import Entity
 
-from . import DOMAIN, WattioDevice
+from . import WattioDevice
+
+from .const import DOMAIN, ICON, MEASUREMENT, SENSORS
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -18,51 +21,30 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
         return
     devices = []
     for device in hass.data[DOMAIN]["devices"]:
-        measurement = None
-        icon = None
-        if device["type"] == "pod":
-            icon = "mdi:power-socket-eu"
-            measurement = "Watt"
-            devices.append(WattioSensor(device["name"],
-                                        device["type"],
-                                        measurement,
-                                        icon,
-                                        device["ieee"]
-                                        ))
+        if device["type"] in SENSORS:
+            if device["type"] == "bat":
+                channel = device["channel"]
+            else:
+                channel = None
+            devices.append(
+                WattioSensor(
+                    device["name"],
+                    device["type"],
+                    MEASUREMENT[device["type"]],
+                    ICON[device["type"]],
+                    device["ieee"],
+                    channel,
+                )
+            )
             _LOGGER.debug("Adding device: %s", device["name"])
-        if device["type"] == "bat":
-            measurement = "Watt"
-            devices.append(WattioSensor(device["name"],
-                                        device["type"],
-                                        measurement,
-                                        icon,
-                                        device["ieee"],
-                                        device["channel"]
-                                        ))
-            _LOGGER.debug("Adding device: %s", device["name"])
-        if device["type"] == "therm":
-            measurement = TEMP_CELSIUS
-            devices.append(WattioSensor(device["name"],
-                                        device["type"],
-                                        measurement,
-                                        icon,
-                                        device["ieee"]
-                                        ))
-            _LOGGER.debug("Adding device: %s", device["name"])
-        if device["type"] == "motion":
-            measurement = TEMP_CELSIUS
-            devices.append(WattioSensor(device["name"],
-                                        device["type"],
-                                        measurement,
-                                        icon,
-                                        device["ieee"]
-                                        ))
-            _LOGGER.debug("Adding device: %s", device["name"])
+
     async_add_entities(devices)
 
 
 class WattioSensor(WattioDevice, Entity):
     """Representation of Sensor."""
+
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, name, devtype, measurement, icon, ieee, channel=None):
         """Initialize the sensor."""
@@ -78,7 +60,7 @@ class WattioSensor(WattioDevice, Entity):
         self._data = None
         self._available = 0
         if channel is not None:
-            self._channel = channel-1
+            self._channel = channel - 1
 
     @property
     def name(self):
@@ -88,12 +70,8 @@ class WattioSensor(WattioDevice, Entity):
     @property
     def available(self):
         """Return availability."""
-        if self._available == 1:
-            _LOGGER.debug("Device %s - available", self._name)
-            return STATE_OK
-        else:
-            _LOGGER.debug("Device %s - NOT available", self._name)
-            return STATE_UNAVAILABLE
+        _LOGGER.debug("Device %s - availability: %s", self._name, self._available)
+        return True if self._available == 1 else False
 
     @property
     def should_poll(self):
@@ -126,8 +104,9 @@ class WattioSensor(WattioDevice, Entity):
     def get_battery_level(self):
         """Return device battery level."""
         if self._battery is not None:
-            battery_level = round((self._battery*100)/4)
+            battery_level = round((self._battery * 100) / 4)
             return battery_level
+        return False
 
     async def async_update(self):
         """Update sensor data."""
@@ -153,5 +132,4 @@ class WattioSensor(WattioDevice, Entity):
                     break
             _LOGGER.debug("Valor: %s", self._state)
             return self._state
-        else:
-            return False
+        return False

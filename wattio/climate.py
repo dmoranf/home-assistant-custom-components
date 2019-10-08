@@ -1,30 +1,44 @@
 """Platform for Wattio integration testing."""
 import logging
 
-import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-from homeassistant.components.climate import (ClimateDevice, PLATFORM_SCHEMA)
-from homeassistant.components.climate.const import (SUPPORT_TARGET_TEMPERATURE,
-                                                    HVAC_MODE_HEAT, HVAC_MODE_AUTO, 
-                                                    HVAC_MODE_OFF)
-from homeassistant.const import (ATTR_TEMPERATURE, STATE_OFF, STATE_OK,
-                                 STATE_UNAVAILABLE, TEMP_CELSIUS)
 
-from . import DOMAIN, WattioDevice, wattioAPI
+import homeassistant.helpers.config_validation as cv
+from homeassistant.components.climate import ClimateDevice, PLATFORM_SCHEMA
+from homeassistant.components.climate.const import (
+    SUPPORT_TARGET_TEMPERATURE,
+    HVAC_MODE_HEAT,
+    HVAC_MODE_AUTO,
+    HVAC_MODE_OFF,
+)
+from homeassistant.const import (
+    ATTR_TEMPERATURE,
+    TEMP_CELSIUS,
+)
 
+from . import WattioDevice, wattioApi
 
-SUPPORT_FLAGS = (SUPPORT_TARGET_TEMPERATURE)
+from .const import (
+    DOMAIN,
+    CLIMATE,
+    CONF_MAX_TEMP,
+    CONF_MIN_TEMP,
+    DEFAULT_MAX_TEMP,
+    DEFAULT_MIN_TEMP,
+    ICON
+)
+
+SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE
 
 DEFAULT_MAX_TEMP = 30
 DEFAULT_MIN_TEMP = 10
 
-CONF_MAX_TEMP = "therm_max_temp"
-CONF_MIN_TEMP = "therm_min_temp"
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
-    vol.Optional(CONF_MAX_TEMP, default=DEFAULT_MAX_TEMP): cv.positive_int,
-    vol.Optional(CONF_MIN_TEMP, default=DEFAULT_MIN_TEMP): cv.positive_int,
-    })
+PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+    {
+        vol.Optional(CONF_MAX_TEMP, default=DEFAULT_MAX_TEMP): cv.positive_int,
+        vol.Optional(CONF_MIN_TEMP, default=DEFAULT_MIN_TEMP): cv.positive_int,
+    }
+)
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -39,21 +53,24 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     devices = []
     # Create Updater Object
     for device in hass.data[DOMAIN]["devices"]:
-        icon = None
-        if device["type"] == "therm":
-            devices.append(WattioThermic(device["name"],
-                                         device["type"],
-                                         icon,
-                                         device["ieee"],
-                                         config.get(CONF_MIN_TEMP),
-                                         config.get(CONF_MAX_TEMP)
-                                         ))
+        if device["type"] in CLIMATE:
+            devices.append(
+                WattioThermic(
+                    device["name"],
+                    device["type"],
+                    ICON[device["type"]],
+                    device["ieee"],
+                    config.get(CONF_MIN_TEMP),
+                    config.get(CONF_MAX_TEMP),
+                )
+            )
             _LOGGER.debug("Adding device: %s", device["name"])
     async_add_entities(devices)
 
 
 class WattioThermic(WattioDevice, ClimateDevice):
     """Representation of Sensor."""
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self, name, devtype, icon, ieee, min_temp, max_temp):
         """Initialize the sensor."""
@@ -68,7 +85,6 @@ class WattioThermic(WattioDevice, ClimateDevice):
         self._current_temperature = None
         self._current_operation_mode = None
         self._target_temperature = None
-        self._channel = None
         self._min_temp = min_temp
         self._max_temp = max_temp
         self._available = 0
@@ -127,18 +143,21 @@ class WattioThermic(WattioDevice, ClimateDevice):
     def hvac_mode(self):
         """Return current operation mode."""
         if self._current_operation_mode == 1:
-            return HVAC_MODE_HEAT
+            current_mode = HVAC_MODE_HEAT
         elif self._current_operation_mode == 2:
-            return HVAC_MODE_AUTO
+            current_mode = HVAC_MODE_AUTO
         else:
-            return HVAC_MODE_OFF
+            current_mode = HVAC_MODE_OFF
+        return current_mode
 
     async def async_set_temperature(self, **kwargs):
         """Set manual temperature."""
         temperature = kwargs.get(ATTR_TEMPERATURE)
         _LOGGER.debug("Set target temperature to %s", temperature)
-        wattio = wattioAPI(self.hass.data[DOMAIN]["token"])
+        wattio = wattioApi(self.hass.data[DOMAIN]["token"])
         wattio.set_thermic_temp(self._ieee, temperature)
+        self._target_temperature = temperature
+        self.schedule_update_ha_state()
 
     async def async_set_hvac_mode(self, hvac_mode):
         """Set operation mode."""
@@ -150,20 +169,16 @@ class WattioThermic(WattioDevice, ClimateDevice):
         else:
             operation_value = 0
         _LOGGER.debug("set operation mode to %s: %s", operation_value, hvac_mode)
-        wattio = wattioAPI(self.hass.data[DOMAIN]["token"])
+        wattio = wattioApi(self.hass.data[DOMAIN]["token"])
         wattio.set_thermic_mode(self._ieee, operation_value)
         self._current_operation_mode = operation_value
+        self.schedule_update_ha_state()
 
     @property
     def available(self):
         """Return availability."""
-        if self._available == 1:
-            _LOGGER.debug("Device %s - available", self._name)
-            return STATE_OK
-        else:
-            _LOGGER.debug("Device %s - NOT available", self._name)
-            return STATE_UNAVAILABLE
-
+        _LOGGER.debug("Device %s - availability: %s", self._name, self._available)
+        return True if self._available == 1 else False
 
     async def async_update(self):
         """Update sensor data."""
@@ -181,5 +196,4 @@ class WattioThermic(WattioDevice, ClimateDevice):
                     self._target_temperature = tempvalue["target"]
                     break
             return 0
-        else:
-            return False
+        return False

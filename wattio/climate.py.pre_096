@@ -12,16 +12,17 @@ from homeassistant.const import (ATTR_TEMPERATURE, STATE_OFF, STATE_OK,
 
 from . import DOMAIN, WattioDevice, wattioAPI
 
+from .const import (
+    DOMAIN,
+    CONF_MAX_TEMP,
+    CONF_MIN_TEMP,
+    DEFAULT_MAX_TEMP,
+    DEFAULT_MIN_TEMP,
+)
 
 SUPPORT_FLAGS = (SUPPORT_TARGET_TEMPERATURE | SUPPORT_OPERATION_MODE)
 
 STATE_MANUAL = "Manual"          # "comfort"
-
-DEFAULT_MAX_TEMP = 30
-DEFAULT_MIN_TEMP = 10
-
-CONF_MAX_TEMP = "therm_max_temp"
-CONF_MIN_TEMP = "therm_min_temp"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(CONF_MAX_TEMP, default=DEFAULT_MAX_TEMP): cv.positive_int,
