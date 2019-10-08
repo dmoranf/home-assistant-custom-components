@@ -80,16 +80,18 @@ Vars:
 
 ----------------------------
 
-### Wattio Smart Home
-<img src="https://img.shields.io/badge/Version-0.2.1-green.svg" />
+## Wattio Smart Home
+<img src="https://img.shields.io/badge/Version-0.2.3-green.svg" />
 
 Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) for last updates.
 
 Link: [Wattio SmartHome](https://wattio.com/)
 
+Follow the conversation at: [Wattio Forum](https://community.wattio.com/portal/community/topic/integrar-wattio-con-home-assistant)
+
 ### Important Info
 
-Since Hass 0.96, the way climate devices work has been changed and it is NOT backward compatible. Default (included) climate.py works for HASS versions >= 0.96, but a file called climate.py_pre_096 is available for use if you are using HASS between 0.92 and 0.96. Just make a backup of climate.py and rename climate.py_pre_096 to climate.py
+Since Hass 0.96, the way climate devices work has been changed and it is NOT backward compatible. Default (included) climate.py works for HASS versions >= 0.96, but a file called climate.py_pre_096 is available (but not mantained) for use if you are using HASS between 0.92 and 0.96. Just make a backup of climate.py and rename climate.py_pre_096 to climate.py
 
 ### Screenshots
 
@@ -132,6 +134,8 @@ wattio:
     scan_interval: 60
     therm_max_temp: 30
     therm_min_temp: 10 
+    security: True
+    security_interval: 300
 ```
 
 Vars:
@@ -141,6 +145,9 @@ Vars:
 | *scan_interval* | OPTIONAL - Time (in seconds) between data updates , defaults to 30 seconds |
 | *therm_max_temp* | OPTIONAL - Max configurable temp for thermic devices, defaults to 30 degrees |
 | *therm_min_temp* | OPTIONAL - Min configurable temp for thermic devices, defaults to 10 degrees |
+| *security* | OPTIONAL - Enable or disable security devices, defaults to False |
+| *security_interval* | OPTIONAL - Time (in seconds) between security devices data updates, defaults to *scan_interval* |
+
 
 ### Adittional steps
 
