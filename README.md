@@ -134,7 +134,7 @@ wattio:
     scan_interval: 60
     therm_max_temp: 30
     therm_min_temp: 10 
-    security: True
+    security: true
     security_interval: 300
 ```
 
