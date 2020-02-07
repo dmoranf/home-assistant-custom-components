@@ -412,7 +412,7 @@ class wattioApi:
         }
         try:
             access_token_response = requests.post(
-                WATTIO_TOKEN_URI, data=data, verify=False, allow_redirects=False
+                WATTIO_TOKEN_URI, data=data, allow_redirects=False
             )
             if "404" in access_token_response.text:
                 _LOGGER.error("Token expired, restart the process")
@@ -434,7 +434,7 @@ class wattioApi:
         api_call_headers = {"Authorization": "Bearer " + self._token}
         try:
             api_call_response = requests.get(
-                WATTIO_DEVICES_URI, headers=api_call_headers, verify=False
+                WATTIO_DEVICES_URI, headers=api_call_headers
             )
             registered_devices = json.loads(api_call_response.text)
             return registered_devices
@@ -448,7 +448,7 @@ class wattioApi:
         api_call_headers = {"Authorization": "Bearer " + self._token}
         try:
             api_call_response = requests.get(
-                WATTIO_STATUS_URI, headers=api_call_headers, verify=False
+                WATTIO_STATUS_URI, headers=api_call_headers
             )
             if api_call_response.status_code == 200:
                 _LOGGER.debug("API call status code %s", api_call_response.status_code)
@@ -465,7 +465,7 @@ class wattioApi:
         api_call_headers = {"Authorization": "Bearer " + self._token}
         try:
             uri = WATTIO_SEC_STATUS_URI.format(str(devtype), str(ieee))
-            api_call_response = requests.get(uri, headers=api_call_headers, verify=False)
+            api_call_response = requests.get(uri, headers=api_call_headers)
             if api_call_response.status_code == 200:
                 _LOGGER.debug(
                     "API security call status code %s", api_call_response.status_code
@@ -489,7 +489,7 @@ class wattioApi:
         api_call_headers = {"Authorization": "Bearer " + self._token}
         try:
             uri = WATTIO_SEC_SET_URI.format(str(devtype), str(ieee), str(status))
-            api_call_response = requests.put(uri, headers=api_call_headers, verify=False)
+            api_call_response = requests.put(uri, headers=api_call_headers)
             _LOGGER.debug(api_call_response.text)
             return 1 if status == "on" else 0
         except requests.exceptions.RequestException as err:
@@ -507,7 +507,7 @@ class wattioApi:
         api_call_headers = {"Authorization": "Bearer " + self._token}
         try:
             uri = wattio_uri.format(str(ieee), str(status))
-            api_call_response = requests.put(uri, headers=api_call_headers, verify=False)
+            api_call_response = requests.put(uri, headers=api_call_headers)
             _LOGGER.debug(api_call_response.text)
             return 1 if status == "on" else 0
         except requests.exceptions.RequestException as err:
@@ -520,7 +520,7 @@ class wattioApi:
         api_call_headers = {"Authorization": "Bearer " + self._token}
         try:
             uri = WATTIO_THERMIC_TEMP_URI.format(str(ieee), str(temp))
-            api_call_response = requests.put(uri, headers=api_call_headers, verify=False)
+            api_call_response = requests.put(uri, headers=api_call_headers)
             _LOGGER.debug(api_call_response.text)
             return 1
         except requests.exceptions.RequestException as err:
@@ -534,7 +534,7 @@ class wattioApi:
         api_call_headers = {"Authorization": "Bearer " + self._token}
         try:
             uri = WATTIO_THERMIC_MODE_URI.format(str(ieee), str(status))
-            api_call_response = requests.put(uri, headers=api_call_headers, verify=False)
+            api_call_response = requests.put(uri, headers=api_call_headers)
             _LOGGER.debug(api_call_response.text)
             return 1
         except requests.exceptions.RequestException as err:
