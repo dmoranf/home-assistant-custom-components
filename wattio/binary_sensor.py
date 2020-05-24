@@ -1,7 +1,10 @@
 """Platform for Wattio integration testing."""
 import logging
 
-from homeassistant.components.binary_sensor import BinarySensorDevice
+try:
+    from homeassistant.components.binary_sensor import BinarySensorEntity
+except ImportError:
+    from homeassistant.components.binary_sensor import BinarySensorDevice as BinarySensorEntity
 from homeassistant.const import ATTR_BATTERY_LEVEL
 
 from . import WattioDevice
@@ -31,7 +34,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities(devices)
 
 
-class WattioBinarySensor(WattioDevice, BinarySensorDevice):
+class WattioBinarySensor(WattioDevice, BinarySensorEntity):
     """Representation of Sensor."""
     # pylint: disable=too-many-instance-attributes
 

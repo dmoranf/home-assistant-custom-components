@@ -1,7 +1,11 @@
 """Platform for Wattio integration testing."""
 import logging
 
-from homeassistant.components.switch import SwitchDevice
+try:
+    from homeassistant.components.switch import SwitchEntity
+except ImportError:
+    from homeassistant.components.switch import SwitchDevice as SwitchEntity
+
 from homeassistant.const import STATE_ON
 
 from . import WattioDevice, wattioApi
@@ -39,7 +43,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities(devices)
 
 
-class WattioSwitch(WattioDevice, SwitchDevice):
+class WattioSwitch(WattioDevice, SwitchEntity):
     """Representation of Switch Sensor."""
 
     # pylint: disable=too-many-instance-attributes
@@ -137,7 +141,7 @@ class WattioSwitch(WattioDevice, SwitchDevice):
         return False
 
 
-class WattioSecurity(WattioDevice, SwitchDevice):
+class WattioSecurity(WattioDevice, SwitchEntity):
     """Representation of Security Sensor."""
 
     # pylint: disable=too-many-instance-attributes
