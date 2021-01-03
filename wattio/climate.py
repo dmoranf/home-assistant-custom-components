@@ -1,8 +1,6 @@
 """Platform for Wattio integration testing."""
 import logging
 
-import voluptuous as vol
-
 import homeassistant.helpers.config_validation as cv
 
 try:
@@ -16,6 +14,10 @@ from homeassistant.components.climate.const import (
     HVAC_MODE_HEAT,
     HVAC_MODE_AUTO,
     HVAC_MODE_OFF,
+    CURRENT_HVAC_OFF,
+    CURRENT_HVAC_HEAT,
+    DEFAULT_MAX_TEMP,
+    DEFAULT_MIN_TEMP
 )
 from homeassistant.const import (
     ATTR_TEMPERATURE,
@@ -29,23 +31,12 @@ from .const import (
     CLIMATE,
     CONF_MAX_TEMP,
     CONF_MIN_TEMP,
-    DEFAULT_MAX_TEMP,
-    DEFAULT_MIN_TEMP,
     ICON
 )
 
 SUPPORT_FLAGS = SUPPORT_TARGET_TEMPERATURE
 
-DEFAULT_MAX_TEMP = 30
-DEFAULT_MIN_TEMP = 10
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Optional(CONF_MAX_TEMP, default=DEFAULT_MAX_TEMP): cv.positive_int,
-        vol.Optional(CONF_MIN_TEMP, default=DEFAULT_MIN_TEMP): cv.positive_int,
-    }
-)
-
+TARGET_TEMPERATURE_STEP = 0.1
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,10 +57,11 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
                     device["type"],
                     ICON[device["type"]],
                     device["ieee"],
-                    config.get(CONF_MIN_TEMP),
-                    config.get(CONF_MAX_TEMP),
+                    DEFAULT_MIN_TEMP,
+                    DEFAULT_MAX_TEMP
                 )
             )
+            #_LOGGER.error("AQUI "+str(config.get(CONF_MIN_TEMP)))
             _LOGGER.debug("Adding device: %s", device["name"])
     async_add_entities(devices)
 
@@ -156,6 +148,20 @@ class WattioThermic(WattioDevice, ClimateEntity):
             current_mode = HVAC_MODE_OFF
         return current_mode
 
+    @property
+    def hvac_action(self):
+        """Return current status."""
+        if self._state == 0:
+            return CURRENT_HVAC_OFF
+        elif self._state == 1:
+            return CURRENT_HVAC_HEAT
+        else:
+            return None
+
+    @property
+    def target_temperature_step(self):
+        return TARGET_TEMPERATURE_STEP
+
     async def async_set_temperature(self, **kwargs):
         """Set manual temperature."""
         temperature = kwargs.get(ATTR_TEMPERATURE)
@@ -200,6 +206,7 @@ class WattioThermic(WattioDevice, ClimateEntity):
                     self._current_temperature = tempvalue["current"]
                     self._current_operation_mode = tempvalue["mode"]
                     self._target_temperature = tempvalue["target"]
+                    self._state = tempvalue["state"]
                     break
             return 0
         return False

@@ -3,8 +3,27 @@ Under development !!
 
 Join the conversation @ https://community.wattio.com/portal/community/topic/integrar-wattio-con-home-assistant
 
+It seems that Wattio has shutted down the forums, so, feel free to send any comment or request using the issues of this repo!
+
 ## TODO
-- Climate needs more testing !!!
+- Climate STILL needs more testing !!!
+- HACS repo
+- Configuration via Config Flow 
+
+## [0.2.4] - 2021-01-02
+Sorry guys, long time since last update ... 
+### Added
+- Device class added to binary sensors to make them available to HomeKit
+- Climate HVAC_ACTION to show current state (Heating or OFF)
+
+### Fixed
+- Wrong behaviours on Climate, it seems that work better now ;)
+
+### Changed
+- Climate step set to 0.1, you can change it if you want editing climate.py
+
+### Removed
+- Removed dynamic vars of max temp and min temp for climate since they were not working as expected. (It will be added again in the future ...)
 
 ## [0.2.3] - 2019-10-04 
 ### Fixed

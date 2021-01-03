@@ -81,7 +81,7 @@ Vars:
 ----------------------------
 
 ## Wattio Smart Home
-<img src="https://img.shields.io/badge/Version-0.2.3-green.svg" />
+<img src="https://img.shields.io/badge/Version-0.2.4-green.svg" />
 
 Wattio Smart Home platform integration for Home Assistant throught Wattio's API. This component is under development, please check [CHANGELOG.md](https://github.com/dmoranf/home-assistant-custom-components/blob/master/wattio/CHANGELOG.md) for last updates.
 
@@ -143,8 +143,6 @@ Add the following to your `configuration.yaml`.
 # Wattio Platform
 wattio:
     scan_interval: 60
-    therm_max_temp: 30
-    therm_min_temp: 10 
     security: true
     security_interval: 300
 ```
@@ -154,8 +152,6 @@ Vars:
 | Var | Description |
 | --- | --- |
 | *scan_interval* | OPTIONAL - Time (in seconds) between data updates , defaults to 30 seconds |
-| *therm_max_temp* | OPTIONAL - Max configurable temp for thermic devices, defaults to 30 degrees |
-| *therm_min_temp* | OPTIONAL - Min configurable temp for thermic devices, defaults to 10 degrees |
 | *security* | OPTIONAL - Enable or disable security devices, defaults to False |
 | *security_interval* | OPTIONAL - Time (in seconds) between security devices data updates, defaults to *scan_interval* |
 

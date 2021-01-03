@@ -85,6 +85,16 @@ class WattioBinarySensor(WattioDevice, BinarySensorEntity):
             attr[ATTR_BATTERY_LEVEL] = self.get_battery_level()
         return attr
 
+    @property
+    def device_class(self):
+        """Return device class."""
+        if self._devtype is not None:
+            if self._devtype == "motion":
+                return "motion"
+            if self._devtype == "door":
+                return "door"
+        return None
+
     def get_battery_level(self):
         """Return device battery level."""
         if self._battery is not None:
