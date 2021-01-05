@@ -10,6 +10,10 @@ It seems that Wattio has shutted down the forums, so, feel free to send any comm
 - HACS repo
 - Configuration via Config Flow 
 
+## [0.2.5] - 2021-01-06
+### Added
+- Time attribute to thermic climate integration (seconds heating today)
+
 ## [0.2.4] - 2021-01-02
 Sorry guys, long time since last update ... 
 ### Added

@@ -86,6 +86,7 @@ class WattioThermic(WattioDevice, ClimateEntity):
         self._min_temp = min_temp
         self._max_temp = max_temp
         self._available = 0
+        self._time = 0
 
     @property
     def name(self):
@@ -159,6 +160,12 @@ class WattioThermic(WattioDevice, ClimateEntity):
             return None
 
     @property
+    def device_state_attributes(self):
+        """Return the device state attributes."""
+        attrs = {"time": self._time}
+        return attrs
+
+    @property
     def target_temperature_step(self):
         return TARGET_TEMPERATURE_STEP
 
@@ -207,6 +214,7 @@ class WattioThermic(WattioDevice, ClimateEntity):
                     self._current_operation_mode = tempvalue["mode"]
                     self._target_temperature = tempvalue["target"]
                     self._state = tempvalue["state"]
+                    self._state = tempvalue["time"]
                     break
             return 0
         return False
